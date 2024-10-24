@@ -1,6 +1,15 @@
 const mongoose = require('mongoose');
 
-mongoose
-.connect(process.env.MONGODB_URI)
-.then(x => console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`))
-.catch(err => console.error('Error connecting to mongo: ', err))
+module.exports = {
+    // Utility function to close database connection
+    closeDatabase: async () => {
+        await mongoose.disconnect();
+    },
+    // Utility function to clear database (useful for testing)
+    clearDatabase: async () => {
+        const collections = await mongoose.connection.db.collections();
+        for (const collection of collections) {
+            await collection.deleteMany({});
+        }
+    }
+};

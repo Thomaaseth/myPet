@@ -8,7 +8,7 @@ const upload = multer({ dest: 'uploads/' });
 // Get all pets for the logged-in user
 router.get('/', isAuthenticated, async (req, res) => {
   try {
-    const pet = await Pet.find({ user: req.user._id });
+    const pets = await Pet.find({ user: req.user._id });
     res.status(200).json({
       message: `Successfully retrieved ${pets.length} pet(s)`,
       data: pets.map(pet => ({
@@ -17,6 +17,7 @@ router.get('/', isAuthenticated, async (req, res) => {
       }))
     });
   } catch (error) {
+    console.error('Error fetching pets:', error);
     res.status(500).json({ message: 'Error fetching pets', error: error.toString() });
   }
 });

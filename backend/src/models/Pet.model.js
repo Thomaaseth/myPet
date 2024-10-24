@@ -120,8 +120,7 @@ petSchema.virtual('age').get(function() {
 
 petSchema.set('toJSON', { virtuals: true });
 
-module.exports = {
-    Pet: mongoose.model('Pet', petSchema ),
-    PET_SPECIES,
-    ALLOWED_SPECIES
-};
+const Pet = mongoose.model('Pet', petSchema);
+module.exports = Pet;
+module.exports.PET_SPECIES = PET_SPECIES;
+module.exports.ALLOWED_SPECIES = ALLOWED_SPECIES;

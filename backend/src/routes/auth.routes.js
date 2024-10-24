@@ -117,14 +117,11 @@ router.put('/update-email', isAuthenticated, async (req, res) => {
     try {
       const { email } = req.body;
       const userId = req.user._id;
-      console.log(`Attempting to update email for user ${userId} to ${email}`);
   
       // Check if the new email is already in use
       const existingUser = await User.findOne({ email });
       if (existingUser) {
-        console.log(`Email ${email} is already in use by user ${existingUser._id}`);
         if (existingUser._id.toString() !== userId) {
-          console.log('Email is in use by a different user, sending 400 response');
           return res.status(400).json({ message: 'Email is already in use' });
         }
       }
@@ -132,13 +129,10 @@ router.put('/update-email', isAuthenticated, async (req, res) => {
       // Only update if the email is different
       const currentUser = await User.findById(userId);
       if (currentUser.email === email) {
-        console.log('Email is unchanged, sending 200 response');
         return res.status(200).json({ message: 'Email is unchanged', user: { email: currentUser.email } });
       }
   
-      console.log('Updating email in database');
       const updatedUser = await User.findByIdAndUpdate(userId, { email }, { new: true });
-      console.log('Email updated successfully');
       res.status(200).json({ message: 'Email updated successfully', user: { email: updatedUser.email } });
     } catch (error) {
       console.error('Error updating email:', error);
