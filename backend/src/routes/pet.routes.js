@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Pet = require('../models/Pet.model');
+
+
 const { isAuthenticated } = require('../middleware/jwt.middleware');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -19,6 +21,25 @@ router.get('/', isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error('Error fetching pets:', error);
     res.status(500).json({ message: 'Error fetching pets', error: error.toString() });
+  }
+});
+
+// Get species list
+router.get('/species-list', async (req, res) => {
+  try {
+    const { PET_SPECIES, ALLOWED_SPECIES } = require('../models/Pet.model');
+    console.log('Fetching species list');
+    console.log('Allowed species:', ALLOWED_SPECIES);
+
+    res.status(200).json({
+      message: 'Species list retrieved successfully',
+      data: {
+        categories: PET_SPECIES,
+        flatList: ALLOWED_SPECIES
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching species list', error: error.toString() });
   }
 });
 
@@ -42,20 +63,6 @@ router.get('/:id', isAuthenticated, async (req, res) => {
 
 });
 
-// Get species list
-router.get('/species', async (req, res) => {
-  try {
-    res.status(200).json({
-      message: 'Species list retrieved successfully',
-      data: {
-        categories: PET_SPECIES,
-        flatList: ALLOWED_SPECIES
-      }
-    });
-  } catch {
-    res.status(500).json({ message: 'Error fetching species list', error: error.toString() });
-  }
-})
 
 // Create a new pet
 router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {

@@ -20,7 +20,7 @@ api.interceptors.request.use(
 
 export const signup = async (userData) => {
   try {
-      const response = await api.post('api/auth/signup', userData);
+      const response = await api.post('/api/auth/signup', userData);
       console.log('Signup response: ', response);
       return response.data;
   } catch (error) {
@@ -35,7 +35,7 @@ export const signup = async (userData) => {
 
 export const login = async (credentials) => {
   try {
-      const response = await api.post('api/auth/login', credentials);
+      const response = await api.post('/api/auth/login', credentials);
       return response.data;
   } catch (error) {
       console.error('Login error:', error.response || error);
@@ -49,7 +49,7 @@ export const login = async (credentials) => {
 
 export const updateEmail = async (newEmail) => {
     try {
-        const response = await api.put('api/auth/update-email', { email: newEmail });
+        const response = await api.put('/api/auth/update-email', { email: newEmail });
         console.log('Update email response:', response);
         return response.data;
     } catch (error) {
@@ -64,7 +64,7 @@ export const updateEmail = async (newEmail) => {
 
 export const changePassword = async (currentPassword, newPassword) => {
     try {
-        const response = await api.put('api/auth/change-password', { currentPassword, newPassword });
+        const response = await api.put('/api/auth/change-password', { currentPassword, newPassword });
         console.log('Change password response:', response);
         return response.data;
     } catch (error) {
@@ -79,7 +79,7 @@ export const changePassword = async (currentPassword, newPassword) => {
 
 export const deleteAccount = async () => {
     try {
-        const response = await api.delete('api/auth/delete-account');
+        const response = await api.delete('/api/auth/delete-account');
         return response.data;
     } catch (error) {
         throw error.response.data;
@@ -95,6 +95,16 @@ export const getPets = async () => {
     } catch (error) {
         console.error('Error fetching products:', error.response || error);
         throw error.response ? error.response.data : error;
+    }
+};
+
+export const getSpeciesList = async () => {
+    try {
+        const response = await api.get('/api/pets/species-list');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching species list:', error);
+        throw error;
     }
 };
 

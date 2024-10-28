@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from "react";
-import { getPets, createPet, updatePet, deletePet } from '../../lib/api'
+import { getPets, createPet, updatePet, deletePet, getSpeciesList } from '../../lib/api'
 import { toast } from "react-toastify";
 import styles from './Pets.module.css'
 import { TOAST_MESSAGES } from "@/utils/toastMessage";
@@ -9,6 +9,7 @@ import { TOAST_MESSAGES } from "@/utils/toastMessage";
 const MyPets = () => {
   const [pets, setPets] = useState([]);
   const [selectedPetId, setSelectedPetId] = useState(null);
+  const [speciesList, setSpeciesList] = useState({ categories: {}, flatList: [] });
   const [newPet, setNewPet] = useState({
       name: '',
       species: '',
@@ -21,6 +22,20 @@ const MyPets = () => {
 
   useEffect(() => {
       fetchPets();
+  }, []);
+
+  useEffect(() => {
+    const fetchSpeciesList = async () => {
+      try {
+        const response = await getSpeciesList();
+        setSpeciesList(response.data);
+      } catch (error) {
+        console.error('Error fetching species list:', error);
+        toast.error('Failed to load species list');
+      }
+    };
+
+    fetchSpeciesList();
   }, []);
 
   // Set first pet as selected when pets are loaded
@@ -190,9 +205,16 @@ const MyPets = () => {
                   onChange={handleInputChange}
                   required
                 >
-                  <option value="dog">Dog</option>
-                  <option value="cat">Cat</option>
-                  <option value="bird">Bird</option>
+                  <option value="">Select a species</option>
+                  {Object.entries(speciesList.categories).map(([category, species]) => (
+                    <optgroup key={category} label={category.replace(/_/g, ' ')}>
+                      {Object.entries(species).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {value.charAt(0).toUpperCase() + value.slice(1)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </div>
   
