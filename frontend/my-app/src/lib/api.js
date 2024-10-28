@@ -133,7 +133,7 @@ export const updatePet = async (petId, petData) => {
     }
 };
 
-export const deletePet = async (productId) => {
+export const deletePet = async (petId) => {
     try {
         const response = await api.delete(`/api/pets/${petId}`);
         return response.data;

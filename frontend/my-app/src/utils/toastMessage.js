@@ -20,7 +20,7 @@ export const TOAST_MESSAGES = {
     WRONG_PASSWORD: 'Incorrect password. Please try again.',
     PASSWORD_RESET_SUCCESS: 'Your password has been successfully reset.',
     PROFILE_UPDATE_SUCCESS: 'Your profile has been successfully updated.',
-    PRODUCT_UPDATE_SUCCESS: 'Pet updated successfully',
+    PET_UPDATE_SUCCESS: 'Pet updated successfully',
     PET_UPDATE_FAIL: 'Update info failed, please try again',
     PET_DELETE_SUCCESS: 'Pet deleted successfully',
     PET_DELETE_FAIL: 'Pet failed to delete, please try again',
