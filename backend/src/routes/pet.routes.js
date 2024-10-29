@@ -220,6 +220,13 @@ router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: 'User not authenticated' });
     }
+    const currentDate = new Date();
+    const weightEntry = {
+      weight: Number(weight),
+      date: currentDate
+    };
+    
+    console.log('Initial weight entry:', weightEntry);
 
     const newPet = new Pet({
       name,
@@ -227,10 +234,16 @@ router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {
       birthDate: birthDateObj,
       weight: Number(weight),
       imageUrl,
-      user: req.user._id
+      user: req.user._id,
+      weights: [weightEntry] 
+      // weights: [{
+      //   weight: Number(weight),
+      //   date: currentDate
+      // }]
     });
 
     await newPet.save();
+    
     res.status(201).json({
       message: 'Pet created successfully',
       data: {
@@ -239,6 +252,7 @@ router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Detailed error:', error);
     res.status(400).json({ message: 'Error creating pet', error: error.toString() });
   }
 });
@@ -268,6 +282,16 @@ router.put('/:id', isAuthenticated, upload.single('image'), async (req, res) => 
       }
       updateData.weight = Number(weight);
     }
+
+    const pet = await Pet.findById(req.params.id);
+      if (pet.weight !== Number(weight)) {
+        updateData.$push = {
+          weights: {
+            weight: Number(weight),
+            date: new Date()
+          }
+        };
+      }
 
 
     if (req.file) {
