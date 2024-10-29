@@ -28,9 +28,6 @@ router.get('/', isAuthenticated, async (req, res) => {
 router.get('/species-list', async (req, res) => {
   try {
     const { PET_SPECIES, ALLOWED_SPECIES } = require('../models/Pet.model');
-    console.log('Fetching species list');
-    console.log('Allowed species:', ALLOWED_SPECIES);
-
     res.status(200).json({
       message: 'Species list retrieved successfully',
       data: {
@@ -42,6 +39,141 @@ router.get('/species-list', async (req, res) => {
     res.status(500).json({ message: 'Error fetching species list', error: error.toString() });
   }
 });
+
+// Get pet weights
+router.get('/:id/weights', isAuthenticated, async (req, res) => {
+  try {
+    const pet = await Pet.findOne({ _id: req.params.id, user: req.user._id });
+    
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    res.status(200).json({
+      message: 'Weights retrieved successfully',
+      data: pet.weights
+    });
+  } catch (error) {
+    res.status(400).json({ message: 'Error fetching weights', error: error.toString() });
+  }
+});
+
+// Add weight entry
+router.post('/:id/weights', isAuthenticated, async (req, res) => {
+  try {
+    const { weight, date } = req.body;
+
+    console.log('Received weight data:', req.body);
+    console.log('Weight type:', typeof weight);
+    console.log('Weight value:', weight);
+    
+    // Validate weight
+    if (!weight || isNaN(weight) || weight <= 0) {
+      return res.status(400).json({ message: 'Valid weight is required' });
+    }
+
+    // Validate date
+    const weightDate = new Date(date);
+    if (isNaN(weightDate) || weightDate > new Date()) {
+      return res.status(400).json({ message: 'Valid date is required and cannot be in the future' });
+    }
+
+    const pet = await Pet.findOne({ _id: req.params.id, user: req.user._id });
+    
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    pet.weights.push({ weight: Number(weight), date: weightDate });
+    await pet.save();
+
+    res.status(201).json({
+      message: 'Weight entry added successfully',
+      data: pet.weights[pet.weights.length - 1]
+    });
+  } catch (error) {
+    res.status(400).json({ message: 'Error adding weight entry', error: error.toString() });
+  }
+});
+
+
+// Update weight entry
+router.put('/:id/weights/:weightId', isAuthenticated, async (req, res) => {
+  try {
+    const { weight, date } = req.body;
+    
+    // Validate weight
+    if (!weight || isNaN(weight) || weight <= 0) {
+      return res.status(400).json({ message: 'Valid weight is required' });
+    }
+
+    // Validate date
+    const weightDate = new Date(date);
+    if (isNaN(weightDate) || weightDate > new Date()) {
+      return res.status(400).json({ message: 'Valid date is required and cannot be in the future' });
+    }
+
+    const pet = await Pet.findOne({ 
+      _id: req.params.id, 
+      user: req.user._id 
+    });
+    
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    // Find and update the specific weight entry
+    const weightEntry = pet.weights.id(req.params.weightId);
+    if (!weightEntry) {
+      return res.status(404).json({ message: 'Weight entry not found' });
+    }
+
+    // Update the weight entry
+    weightEntry.weight = Number(weight);
+    weightEntry.date = weightDate;
+
+    // Save the updated pet document
+    await pet.save();
+
+    res.status(200).json({
+      message: 'Weight entry updated successfully',
+      data: weightEntry
+    });
+  } catch (error) {
+    res.status(400).json({ 
+      message: 'Error updating weight entry', 
+      error: error.toString() 
+    });
+  }
+});
+
+// Delete weight entry
+router.delete('/:id/weights/:weightId', isAuthenticated, async (req, res) => {
+  try {
+    if (!req.params.weightId) {
+      return res.status(400).json({ message: 'Weight ID is required' });
+    }
+
+    const pet = await Pet.findOne({ _id: req.params.id, user: req.user._id });
+    
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    const weightExists = pet.weights.some(w => w._id.toString() === req.params.weightId);
+    if (!weightExists) {
+      return res.status(404).json({ message: 'Weight entry not found' });
+    }
+
+    pet.weights = pet.weights.filter(w => w._id.toString() !== req.params.weightId);
+    await pet.save();
+
+    res.status(200).json({ message: 'Weight entry deleted successfully' });
+  } catch (error) {
+    res.status(400).json({ message: 'Error deleting weight entry', error: error.toString() });
+  }
+});
+
 
 // Get a single pet
 router.get('/:id', isAuthenticated, async (req, res) => {
@@ -62,7 +194,6 @@ router.get('/:id', isAuthenticated, async (req, res) => {
     }
 
 });
-
 
 // Create a new pet
 router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {

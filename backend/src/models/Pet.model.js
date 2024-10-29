@@ -64,6 +64,26 @@ const PET_SPECIES = {
 const ALLOWED_SPECIES = Object.values(PET_SPECIES)
     .reduce((acc, categorySpecies) => [...acc, ...Object.values(categorySpecies)], []);
 
+// Weight Entry Schema
+const weightEntrySchema = new mongoose.Schema({
+    weight: {
+        type: Number,
+        required: true,
+        min: 0
+    },
+    date: {
+        type: Date,
+        required: true,
+        validate: {
+            validator: function(date) {
+                return date <= new Date();
+            },
+            message: 'Weight date cannot be in the future'
+        }
+    }
+}, { timestamps: true });
+
+
 const petSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -90,10 +110,15 @@ const petSchema = new mongoose.Schema({
             message: 'Birth date cannot be in the future'
         }
     },
-    weight: {
+    weight: {          // Current weight
         type: Number,
         required: true,
         min: 0
+    },
+    weights: [weightEntrySchema],  // Weight history array
+    imageUrl: {
+        type: String,
+        default: null
     },
     imageUrl: {
         type: String,

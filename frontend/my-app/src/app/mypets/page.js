@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { getPets, createPet, updatePet, deletePet, getSpeciesList } from '../../lib/api'
+import WeightTracker from "@/components/WeightTracker";
 import { toast } from "react-toastify";
 import styles from './Pets.module.css'
 import { TOAST_MESSAGES } from "@/utils/toastMessage";
@@ -301,6 +302,14 @@ const MyPets = () => {
                     <span>{selectedPet.weight} kg</span>
                   </div>
                 </div>
+              </div>
+
+              {/* WeightTracker component */}
+              <div className={styles.weightTrackerContainer}>
+                <WeightTracker 
+                  petId={selectedPet._id}
+                  initialWeight={selectedPet.weight}
+                />
               </div>
   
               {/* Edit Form */}

@@ -1,0 +1,136 @@
+.weight-tracker {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .weight-form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    align-items: flex-end;
+  }
+  
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .input-group label {
+    font-weight: bold;
+    color: #666;
+  }
+  
+  .input-group input {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .weight-form button {
+    padding: 0.5rem 1rem;
+    background: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .weight-form button:hover {
+    background: #0051a8;
+  }
+  
+  .weight-graph {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 8px;
+  }
+  
+  .weight-log {
+    margin-top: 2rem;
+  }
+  
+  .weight-log table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .weight-log th,
+  .weight-log td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .weight-log th {
+    font-weight: bold;
+    background: #f8f8f8;
+  }
+  
+  .weight-log button {
+    padding: 0.25rem 0.5rem;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .weight-log button:hover {
+    background: #cc0000;
+  }
+
+  .editActions,
+.rowActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.editButton,
+.deleteButton,
+.saveButton,
+.cancelButton {
+    padding: 0.25rem 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.editButton {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.deleteButton {
+    background-color: #f44336;
+    color: white;
+}
+
+.saveButton {
+    background-color: #2196F3;
+    color: white;
+}
+
+.cancelButton {
+    background-color: #607D8B;
+    color: white;
+}
+
+.editButton:hover,
+.deleteButton:hover,
+.saveButton:hover,
+.cancelButton:hover {
+    opacity: 0.9;
+}
+
+.td input {
+    width: 100%;
+    padding: 0.25rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}

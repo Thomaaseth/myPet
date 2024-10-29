@@ -86,7 +86,7 @@ export const deleteAccount = async () => {
     }
 };
 
-// Products CRUD operations
+// Pets CRUD operations
 
 export const getPets = async () => {
     try {
@@ -149,6 +149,56 @@ export const deletePet = async (petId) => {
         return response.data;
     } catch (error) {
         console.error('Error deleting product:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+// Pets weight operations
+
+export const addPetWeight = async (petId, weightData) => {
+    try {
+        console.log('Sending weight data:', weightData);
+
+        const response = await api.post(`/api/pets/${petId}/weights`, weightData);
+        console.log('Server response:', response);
+
+        console.log('Weight added:', response.data);
+        return response.data;
+    } catch (error) {
+        console.log('Error adding weight:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const getPetWeights = async (petId) => {
+    try {
+        const response = await api.get(`/api/pets/${petId}/weights`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching weights:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const deletePetWeight = async (petId, weightId) => {
+    try {
+        const response = await api.delete(`/api/pets/${petId}/weights/${weightId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting weight entry:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const updatePetWeight = async (petId, weightId, weightData) => {
+    try {
+        const response = await api.put(
+            `/api/pets/${petId}/weights/${weightId}`, 
+            weightData
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating weight entry:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
