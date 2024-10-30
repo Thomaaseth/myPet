@@ -1,0 +1,69 @@
+.petDetails {
+    margin-top: 20px;
+}
+
+.petHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.petHeader h2 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.petActions {
+    display: flex;
+    gap: 10px;
+}
+
+.petContent {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.petInfo {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+}
+
+.petImageContainer {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.petImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.petStats {
+    display: grid;
+    gap: 15px;
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.statItem label {
+    font-weight: bold;
+    color: #666;
+    min-width: 100px;
+}
+
+.weightTrackerContainer {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 500px;
+}

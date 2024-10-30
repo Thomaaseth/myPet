@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
-import { addPetWeight, getPetWeights,deletePetWeight, updatePetWeight } from '../lib/api';
+import { addPetWeight, getPetWeights,deletePetWeight, updatePetWeight } from '../../lib/api';
 import { toast } from "react-toastify";
 import styles from './Weight.module.css'
 

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { getPets, createPet, updatePet, deletePet, getSpeciesList } from '../../lib/api'
-import WeightTracker from "@/components/WeightTracker";
+import WeightTracker from "@/components/weightTracker/index";
+import PetDetailsLayout from '@/components/layouts/PetDetailsLayout';
 import { toast } from "react-toastify";
 import styles from './Pets.module.css'
 import { TOAST_MESSAGES } from "@/utils/toastMessage";
@@ -164,13 +165,13 @@ const MyPets = () => {
         
         {/* Pet Tabs Navigation */}
         <div className={styles.petTabs}>
-          {pets.map((pet, index) => (
+          {pets.map((pet) => (
             <button
               key={pet._id}
               className={`${styles.petTab} ${selectedPetId === pet._id ? styles.active : ''}`}
               onClick={() => setSelectedPetId(pet._id)}
             >
-              {`${pet.name}`}
+              {pet.name}
             </button>
           ))}
           <button 
@@ -180,7 +181,7 @@ const MyPets = () => {
             + Add New Pet
           </button>
         </div>
-  
+    
         {/* Add Pet Form */}
         {isFormVisible && (
           <div className={styles.addPetFormContainer}>
@@ -196,7 +197,7 @@ const MyPets = () => {
                   required
                 />
               </div>
-  
+    
               <div className={styles.formGroup}>
                 <label htmlFor="species">Species:</label>
                 <select
@@ -218,7 +219,7 @@ const MyPets = () => {
                   ))}
                 </select>
               </div>
-  
+    
               <div className={styles.formGroup}>
                 <label htmlFor="birthDate">Birth Date:</label>
                 <input
@@ -230,7 +231,7 @@ const MyPets = () => {
                   required
                 />
               </div>
-  
+    
               <div className={styles.formGroup}>
                 <label htmlFor="weight">Weight (kg):</label>
                 <input
@@ -244,7 +245,7 @@ const MyPets = () => {
                   required
                 />
               </div>
-  
+    
               <div className={styles.formGroup}>
                 <label htmlFor="image">Pet Image:</label>
                 <input
@@ -255,124 +256,83 @@ const MyPets = () => {
                   accept="image/*"
                 />
               </div>
-  
+    
               <button type="submit">Add Pet</button>
             </form>
           </div>
         )}
-  
-        {/* Selected Pet Details */}
+    
+        {/* Selected Pet Details with Layout */}
         {selectedPet && (
-          <div className={styles.petDetails}>
-            <div className={styles.petHeader}>
-              <h2>{selectedPet.name}</h2>
-              <div className={styles.petActions}>
-                <button onClick={() => handleEditClick(selectedPet)}>Edit</button>
-                <button onClick={() => handleDeletePet(selectedPet._id)}>Delete</button>
-              </div>
-            </div>
-  
-            <div className={styles.petContent}>
-              <div className={styles.petInfo}>
-                <div className={styles.petImageContainer}>
-                  {selectedPet.imageUrl && (
-                    <img
-                      src={selectedPet.imageUrl}
-                      alt={selectedPet.name}
-                      className={styles.petImage}
-                    />
-                  )}
-                </div>
-                
-                <div className={styles.petStats}>
-                  <div className={styles.statItem}>
-                    <label>Species:</label>
-                    <span>{selectedPet.species}</span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <label>Age:</label>
-                    <span>{selectedPet.age} years</span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <label>Birth Date:</label>
-                    <span>{new Date(selectedPet.birthDate).toLocaleDateString()}</span>
-                  </div>
-                  <div className={styles.statItem}>
-                    <label>Weight:</label>
-                    <span>{selectedPet.weight} kg</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* WeightTracker component */}
-              <div className={styles.weightTrackerContainer}>
-                <WeightTracker 
-                  petId={selectedPet._id}
-                  initialWeight={selectedPet.weight}
+          <PetDetailsLayout
+            pet={selectedPet}
+            onEdit={() => handleEditClick(selectedPet)}
+            onDelete={() => handleDeletePet(selectedPet._id)}
+          >
+            <WeightTracker 
+              petId={selectedPet._id}
+              initialWeight={selectedPet.weight}
+            />
+          </PetDetailsLayout>
+        )}
+    
+        {/* Edit Form Overlay */}
+        {editingPet && editingPet._id === selectedPet._id && (
+          <div className={styles.editFormOverlay}>
+            <form onSubmit={handleUpdatePet} className={styles.editPetForm}>
+              <input
+                type="text"
+                name="name"
+                value={editingPet.name}
+                onChange={(e) => handleInputChange(e, true)}
+                required
+              />
+              
+              <select
+                name="species"
+                value={editingPet.species}
+                onChange={(e) => handleInputChange(e, true)}
+                required
+              >
+                <option value="dog">Dog</option>
+                <option value="cat">Cat</option>
+                <option value="bird">Bird</option>
+              </select>
+    
+              <input
+                type="date"
+                name="birthDate"
+                value={editingPet.birthDate}
+                onChange={(e) => handleInputChange(e, true)}
+                required
+              />
+    
+              <input
+                type="number"
+                name="weight"
+                value={editingPet.weight}
+                onChange={(e) => handleInputChange(e, true)}
+                min="0"
+                step="0.1"
+                required
+              />
+    
+              <div>
+                <p>Current Image: {editingPet.currentImage || 'No image uploaded'}</p>
+                <input
+                  type="file"
+                  name="image"
+                  onChange={(e) => handleFileChange(e, true)}
+                  accept="image/*"
                 />
               </div>
-  
-              {/* Edit Form */}
-              {editingPet && editingPet._id === selectedPet._id && (
-                <div className={styles.editFormOverlay}>
-                  <form onSubmit={handleUpdatePet} className={styles.editPetForm}>
-                    <input
-                      type="text"
-                      name="name"
-                      value={editingPet.name}
-                      onChange={(e) => handleInputChange(e, true)}
-                      required
-                    />
-                    
-                    <select
-                      name="species"
-                      value={editingPet.species}
-                      onChange={(e) => handleInputChange(e, true)}
-                      required
-                    >
-                      <option value="dog">Dog</option>
-                      <option value="cat">Cat</option>
-                      <option value="bird">Bird</option>
-                    </select>
-  
-                    <input
-                      type="date"
-                      name="birthDate"
-                      value={editingPet.birthDate}
-                      onChange={(e) => handleInputChange(e, true)}
-                      required
-                    />
-  
-                    <input
-                      type="number"
-                      name="weight"
-                      value={editingPet.weight}
-                      onChange={(e) => handleInputChange(e, true)}
-                      min="0"
-                      step="0.1"
-                      required
-                    />
-  
-                    <div>
-                      <p>Current Image: {editingPet.currentImage || 'No image uploaded'}</p>
-                      <input
-                        type="file"
-                        name="image"
-                        onChange={(e) => handleFileChange(e, true)}
-                        accept="image/*"
-                      />
-                    </div>
-  
-                    <button type="submit">Save</button>
-                    <button type="button" onClick={() => setEditingPet(null)}>Cancel</button>
-                  </form>
-                </div>
-              )}
-            </div>
+    
+              <button type="submit">Save</button>
+              <button type="button" onClick={() => setEditingPet(null)}>Cancel</button>
+            </form>
           </div>
         )}
       </div>
     );
-  }
-    
+}
     export default MyPets;
