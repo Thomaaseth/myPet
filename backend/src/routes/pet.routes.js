@@ -63,10 +63,6 @@ router.post('/:id/weights', isAuthenticated, async (req, res) => {
   try {
     const { weight, date } = req.body;
 
-    console.log('Received weight data:', req.body);
-    console.log('Weight type:', typeof weight);
-    console.log('Weight value:', weight);
-    
     // Validate weight
     if (!weight || isNaN(weight) || weight <= 0) {
       return res.status(400).json({ message: 'Valid weight is required' });
@@ -236,10 +232,6 @@ router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {
       imageUrl,
       user: req.user._id,
       weights: [weightEntry] 
-      // weights: [{
-      //   weight: Number(weight),
-      //   date: currentDate
-      // }]
     });
 
     await newPet.save();

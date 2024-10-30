@@ -1,0 +1,33 @@
+.petTabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    overflow-x: auto;
+  }
+  
+  .petTab {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #666;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+  }
+  
+  .petTab:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .petTab.active {
+    color: #0070f3;
+    border-bottom: 2px solid #0070f3;
+    margin-bottom: -2px;
+  }
+  
+  .addPetTab {
+    color: #0070f3;
+  }
