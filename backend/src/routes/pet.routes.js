@@ -222,8 +222,6 @@ router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {
       date: currentDate
     };
     
-    console.log('Initial weight entry:', weightEntry);
-
     const newPet = new Pet({
       name,
       species,
@@ -244,7 +242,6 @@ router.post('/', isAuthenticated, upload.single('image'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Detailed error:', error);
     res.status(400).json({ message: 'Error creating pet', error: error.toString() });
   }
 });
@@ -254,6 +251,16 @@ router.put('/:id', isAuthenticated, upload.single('image'), async (req, res) => 
   try {
     if (!req.params.id) {
       return res.status(400).json({ message: 'Pet ID is required' });
+    }
+
+    // First check if the pet exists and belongs to the user
+    const existingPet = await Pet.findOne({ 
+      _id: req.params.id, 
+      user: req.user._id 
+    });
+
+    if (!existingPet) {
+      return res.status(404).json({ message: 'Pet not found' });
     }
 
     const { name, species, birthDate, weight } = req.body;
@@ -273,10 +280,9 @@ router.put('/:id', isAuthenticated, upload.single('image'), async (req, res) => 
         return res.status(400).json({ message: 'Weight must be a positive number' });
       }
       updateData.weight = Number(weight);
-    }
 
-    const pet = await Pet.findById(req.params.id);
-      if (pet.weight !== Number(weight)) {
+      // Only add to weights array if weight has changed
+      if (existingPet.weight !== Number(weight)) {
         updateData.$push = {
           weights: {
             weight: Number(weight),
@@ -284,21 +290,17 @@ router.put('/:id', isAuthenticated, upload.single('image'), async (req, res) => 
           }
         };
       }
-
+    }
 
     if (req.file) {
       updateData.imageUrl = req.file.path;
     }
 
-    const updatedPet = await Pet.findOneAndUpdate(
-      { _id: req.params.id, user: req.user._id },
+    const updatedPet = await Pet.findByIdAndUpdate(
+      req.params.id,
       updateData,
       { new: true }
     );
-
-    if (!updatedPet) {
-      return res.status(404).json({ message: 'Pet not found' });
-    }
 
     res.status(200).json({
       message: 'Pet updated successfully',

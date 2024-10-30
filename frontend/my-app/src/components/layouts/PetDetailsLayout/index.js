@@ -2,13 +2,13 @@
 
 import React from "react"
 import PetProfile from "@/components/PetProfile"
+import WeightTracker from "@/components/WeightTracker"
 import styles from './PetDetailsLayout.module.css'
 
 const PetDetailsLayout = ({
     pet,
     onEdit,
     onDelete,
-    children
 }) => {
   return (
     <div className={styles.petDetails}>
@@ -23,7 +23,10 @@ const PetDetailsLayout = ({
       <div className={styles.petContent}>
         <PetProfile pet={pet} />
         <div className={styles.weightTrackerContainer}>
-          {children}
+        <WeightTracker 
+                        petId={pet._id}
+                        initialWeight={pet.weight}
+                    />
         </div>
       </div>
     </div>

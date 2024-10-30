@@ -26,9 +26,11 @@ require('./src/config/config')(app);
 // Routes from src
 const authRoutes = require('./src/routes/auth.routes');
 const petRoutes = require('./src/routes/pet.routes');
+const vetRoutes = require('./src/routes/vet.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/pets', petRoutes);
+app.use('/api/vets', vetRoutes);
 
 // Error handling
 require('./error-handling/error.handling')(app);

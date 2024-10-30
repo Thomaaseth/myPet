@@ -1,6 +1,9 @@
 const jwt = require('jsonwebtoken');
 const User = require('../src/models/User.model');
 const Pet = require('../src/models/Pet.model');
+const Vet = require('../src/models/Vet.model');
+const VetVisit = require('../src/models/VetVisit.model');
+
 const bcrypt = require('bcryptjs');
 
 const createTestUser = async () => {
@@ -54,8 +57,56 @@ const createTestPet = async (user, data = {}) => {
     });
 };
 
+const createTestVet = async (user, overrides = {}) => {
+    const vet = await Vet.create({
+        clinicName: overrides.clinicName || 'Test Clinic',
+        vetName: overrides.vetName || 'Dr. Test',
+        address: {
+            street: '123 Test St',
+            city: 'Test City',
+            state: 'TS',
+            zipCode: '12345',
+            country: 'Test Country'
+        },
+        contactInfo: {
+            email: 'test@vet.com',
+            phone: '123-456-7890'
+        },
+        ...overrides
+    });
+
+    // Add vet to user's vets array
+    await User.findByIdAndUpdate(user._id, {
+        $addToSet: { vets: vet._id }
+    });
+
+    return vet;
+};
+
+const createTestVetVisit = async (pet, vet, overrides = {}) => {
+    const visit = await VetVisit.create({
+        pet: pet._id,
+        vet: vet._id,
+        dateOfVisit: overrides.dateOfVisit || new Date(),
+        reason: overrides.reason || 'Regular checkup',
+        notes: overrides.notes || 'Test notes',
+        ...overrides
+    });
+
+    // Add visit to pet's vetVisits array
+    await Pet.findByIdAndUpdate(pet._id, {
+        $push: { vetVisits: visit._id }
+    });
+
+    return visit;
+};
+
+
+
 module.exports = {
     createTestUser,
     createPetTestUser,
-    createTestPet
+    createTestPet,
+    createTestVet,
+    createTestVetVisit,
 };

@@ -43,11 +43,6 @@ const WeightTracker = ({ petId }) => {
                 weight: parseFloat(newWeight),
                 date: weightDate
             };
-
-            console.log('Submitting weight data:', weightData);
-            console.log('Weight type:', typeof weightData.weight);
-            console.log('Weight value:', weightData.weight);
-
             const response = await addPetWeight(petId, weightData);
             
             // Update local state with new weight

@@ -189,10 +189,6 @@ const MyPets = () => {
             onEdit={() => handleEditClick(selectedPet)}
             onDelete={() => handleDeletePet(selectedPet._id)}
           >
-            <WeightTracker 
-              petId={selectedPet._id}
-              initialWeight={selectedPet.weight}
-            />
           </PetDetailsLayout>
         )}
   

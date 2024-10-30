@@ -128,7 +128,15 @@ const petSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
-    }
+    },
+    vets: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vet'
+    }],
+    vetVisits: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'VetVisit'
+    }]
 }, {timestamps: true});
 
 petSchema.virtual('age').get(function() {

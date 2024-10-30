@@ -30,7 +30,7 @@ const PetStats = ({ pet }) => {
       />
       <StatsItem 
         label="Age" 
-        value={`${formatAge(pet.birthDate)} years`} 
+        value={`${formatAge(pet.birthDate)}`} 
       />
       <StatsItem 
         label="Birth Date" 
