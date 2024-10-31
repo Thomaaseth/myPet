@@ -1,0 +1,214 @@
+
+.vetManager {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+  }
+  
+  .tabs {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    overflow-x: auto;
+  }
+  
+  .tab {
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  
+  .tab:hover {
+    background: #f0f0f0;
+  }
+  
+  .tab.active {
+    background: #0070f3;
+    color: white;
+  }
+  
+  .content {
+    padding: 20px;
+  }
+  
+  /* Form Styles */
+  .vetForm {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+  }
+  
+  .formGroup {
+    margin-bottom: 20px;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .formGroup input,
+  .formGroup select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .formGroup input:focus,
+  .formGroup select:focus {
+    outline: none;
+    border-color: #0070f3;
+    box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.1);
+  }
+  
+  .formRow {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .formRow .formGroup {
+    flex: 1;
+  }
+  
+  /* Vet Info Display */
+  .vetInfo {
+    padding: 20px;
+  }
+  
+  .infoSection {
+    margin-bottom: 20px;
+  }
+  
+  .infoSection h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .infoSection p {
+    margin: 5px 0;
+    color: #666;
+  }
+  
+  .visitSection {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .visitInfo p {
+    margin: 5px 0;
+  }
+  
+  .visitActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .documentSection {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  /* Buttons */
+  .formActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  .submitButton,
+  .cancelButton,
+  .documentsButton,
+  .uploadButton,
+  .visitActions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
+  
+  .submitButton,
+  .uploadButton {
+    background: #0070f3;
+    color: white;
+  }
+  
+  .submitButton:hover,
+  .uploadButton:hover {
+    background: #0051a2;
+  }
+  
+  .cancelButton,
+  .documentsButton,
+  .visitActions button {
+    background: #f0f0f0;
+    color: #666;
+  }
+  
+  .cancelButton:hover,
+  .documentsButton:hover,
+  .visitActions button:hover {
+    background: #e0e0e0;
+  }
+  
+  /* Document display section */
+  .documentsContainer {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .documentList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .documentItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .documentItem:last-child {
+    border-bottom: none;
+  }
+  
+  /* Upload section */
+  .uploadSection {
+    margin-top: 20px;
+    padding: 15px;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .uploadSection.dragActive {
+    border-color: #0070f3;
+    background: rgba(0, 112, 243, 0.05);
+  }

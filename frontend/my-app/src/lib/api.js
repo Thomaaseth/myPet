@@ -202,3 +202,87 @@ export const updatePetWeight = async (petId, weightId, weightData) => {
         throw error.response ? error.response.data : error;
     }
 };
+
+// Vet operations
+
+export const getVets = async () => {
+    try {
+        const response = await api.get('/api/vets');
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching vets:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const createVet = async (vetData) => {
+    try {
+        const response = await api.post('/api/vets', vetData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating vet:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const updateVet = async (vetId, vetData) => {
+    try {
+        const response = await api.put(`/api/vets/${vetId}`, vetData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating vet:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const deleteVet = async (vetId) => {
+    try {
+        const response = await api.delete(`/api/vets/${vetId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting vet:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+// Vet visit operations
+
+export const getVetVisits = async (petId) => {
+    try {
+        const response = await api.get(`/api/vets/${petId}/visits`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching vet visits:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const createVetVisit = async (vetId, petId, visitData) => {
+    try {
+        const response = await api.post(`/api/vets/${vetId}/visits/${petId}`, visitData);
+        return response.data;
+    } catch (error) {
+        console.error('Error creating vet visit:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const updateVetVisit = async (vetId, petId, visitData) => {
+    try {
+        const response = await api.put(`/api/vets/${vetId}/visits/${petId}`, visitData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating vet visit:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const deleteVetVisit = async (vetId, petId, visitData) => {
+    try {
+        const response = await api.delete(`/api/vets/${vetId}/visits/${petId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting vet visit:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};

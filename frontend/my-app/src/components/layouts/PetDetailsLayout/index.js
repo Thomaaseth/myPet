@@ -3,6 +3,7 @@
 import React from "react"
 import PetProfile from "@/components/PetProfile"
 import WeightTracker from "@/components/WeightTracker"
+import VetManager from "@/components/VetManager"
 import styles from './PetDetailsLayout.module.css'
 
 const PetDetailsLayout = ({
@@ -22,6 +23,7 @@ const PetDetailsLayout = ({
 
       <div className={styles.petContent}>
         <PetProfile pet={pet} />
+        <VetManager pet={pet} />
         <div className={styles.weightTrackerContainer}>
         <WeightTracker 
                         petId={pet._id}
