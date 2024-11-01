@@ -57,7 +57,7 @@ const createTestPet = async (user, data = {}) => {
     });
 };
 
-const createTestVet = async (user, overrides = {}) => {
+const createTestVet = async (user, pet, overrides = {}) => {
     const vet = await Vet.create({
         clinicName: overrides.clinicName || 'Test Clinic',
         vetName: overrides.vetName || 'Dr. Test',
@@ -72,11 +72,12 @@ const createTestVet = async (user, overrides = {}) => {
             email: 'test@vet.com',
             phone: '123-456-7890'
         },
+        pets: [pet._id],
         ...overrides
     });
 
-    // Add vet to user's vets array
-    await User.findByIdAndUpdate(user._id, {
+    // Add vet to pet's vets array
+    await Pet.findByIdAndUpdate(pet._id, {
         $addToSet: { vets: vet._id }
     });
 

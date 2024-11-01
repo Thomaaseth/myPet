@@ -30,7 +30,7 @@ const vetRoutes = require('./src/routes/vet.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/pets', petRoutes);
-app.use('/api/vets', vetRoutes);
+app.use('/api/', vetRoutes);
 
 // Error handling
 require('./error-handling/error.handling')(app);

@@ -13,24 +13,27 @@ const vetVisitSchema = new mongoose.Schema({
     },
     dateOfVisit: {
         type: Date,
-        required: true
+        required: true,
+        validate: {
+            validator: function(date) {
+                return date <= new Date();
+            },
+            message: 'Visit date cannot be in the future'
+        }
     },
     nextAppointment: {
         type: Date
     },
-    reason: {
-        type: String,
-        required: true
-    },
+    reason: String,
     notes: String,
     documents: [{
-        name: String,
-        url: String,
+        name: { type: String },
+        url: { type: String },
         uploadDate: {
             type: Date,
             default: Date.now
         },
-        type: String
+        type: { type: String }
     }],
     prescriptions: [{
         medication: String,

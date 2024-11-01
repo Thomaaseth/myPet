@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Pet = require('../models/Pet.model');
-
-
 const { isAuthenticated } = require('../middleware/jwt.middleware');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
