@@ -152,9 +152,38 @@ router.delete('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
             $pull: { pets: pet._id }
         });
 
+        // Get all visits for this pet and vet
+        const visits = await VetVisit.find({
+            pet: req.params.petId,
+            vet: req.params.vetId
+        });
+
+        // Remove these visits from both pet and vet
+        if (visits.length > 0) {
+            const visitIds = visits.map(visit => visit._id);
+
+            // Remove visits from pet's vetVisits array
+            await Pet.findByIdAndUpdate(req.params.petId, {
+                $pull: { vetVisits: { $in: visitIds } }
+            });
+
+            // Remove visits from vet's visits array
+            await Vet.findByIdAndUpdate(req.params.vetId, {
+                $pull: { visits: { $in: visitIds } }
+            });
+
+            // Delete the visits themselves
+            await VetVisit.deleteMany({
+                _id: { $in: visitIds }
+            });
+        }
+
+
         // If vet has no more pets, optionally delete the vet
         const vet = await Vet.findById(req.params.vetId);
         if (vet && vet.pets.length === 0) {
+            await VetVisit.deleteMany({ vet: req.params.vetId });
+
             await Vet.findByIdAndDelete(req.params.vetId);
         }
 
@@ -255,6 +284,12 @@ router.post('/pets/:petId/vets/:vetId/visits', isAuthenticated, upload.array('do
         await Pet.findByIdAndUpdate(
             req.params.petId,
             { $push: { vetVisits: visit._id } }
+        );
+
+        // Add visit to vet's visits array
+        await Vet.findByIdAndUpdate(
+        req.params.vetId,
+        { $push: { visits: visit._id } }
         );
 
         res.status(201).json({
@@ -368,6 +403,12 @@ router.delete('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, async
             { $pull: { vetVisits: visit._id } }
         );
 
+        // Remove visit from vet's visits array
+        await Vet.findByIdAndUpdate(
+        req.params.vetId,
+        { $pull: { visits: visit._id } }
+        );
+
         await VetVisit.findByIdAndDelete(visit._id);
 
         res.status(200).json({ 
@@ -377,4 +418,40 @@ router.delete('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, async
         res.status(400).json({ message: 'Error deleting visit', error: error.toString() });
     }
 });
+
+// Get all visits for a specific vet
+router.get('/vets/:vetId/visits', isAuthenticated, async (req, res) => {
+    try {
+        // Verify the vet is associated with one of the user's pets
+        const pet = await Pet.findOne({
+            user: req.user._id,
+            vets: req.params.vetId
+        });
+
+        if (!pet) {
+            return res.status(404).json({ message: 'Vet not found or not associated with your pets' });
+        }
+
+        const vet = await Vet.findById(req.params.vetId)
+            .populate({
+                path: 'visits',
+                populate: {
+                    path: 'pet',
+                    select: 'name species'
+                }
+            });
+
+        if (!vet) {
+            return res.status(404).json({ message: 'Vet not found' });
+        }
+
+        res.status(200).json({
+            message: 'Vet visits retrieved successfully',
+            data: vet.visits || []
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching vet visits', error: error.toString() });
+    }
+});
+
 module.exports = router;

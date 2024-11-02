@@ -93,7 +93,7 @@ export const getPets = async () => {
         const response = await api.get('/api/pets');
         return response.data;
     } catch (error) {
-        console.error('Error fetching products:', error.response || error);
+        console.error('Error fetching pets:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
@@ -148,7 +148,7 @@ export const deletePet = async (petId) => {
         const response = await api.delete(`/api/pets/${petId}`);
         return response.data;
     } catch (error) {
-        console.error('Error deleting product:', error.response || error);
+        console.error('Error deleting pet:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
@@ -345,6 +345,16 @@ export const updateVetVisit = async (petId, vetId, visitId, visitData) => {
     }
 };
 
+export const getAllVetVisits = async (vetId) => {
+    try {
+        const response = await api.get(`/api/vets/${vetId}/visits`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching all vet visits:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
 export const deleteVetVisit = async (petId, vetId, visitId) => {
     try {
         const response = await api.delete(
@@ -356,3 +366,4 @@ export const deleteVetVisit = async (petId, vetId, visitId) => {
         throw error.response ? error.response.data : error;
     }
 };
+
