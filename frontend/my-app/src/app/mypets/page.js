@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { getPets, createPet, updatePet, deletePet, getSpeciesList } from '../../lib/api'
-import WeightTracker from "@/components/WeightTracker/index";
 import PetDetailsLayout from '@/components/layouts/PetDetailsLayout';
 import PetTabs from "@/components/PetTabs";
 import AddPetForm from "@/components/PetForms/addPetForm";

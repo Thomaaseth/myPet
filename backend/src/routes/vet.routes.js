@@ -303,9 +303,9 @@ router.put('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, upload.a
         // Update fields
         const updates = {
             ...(req.body.dateOfVisit && { dateOfVisit: req.body.dateOfVisit }),
-            ...(req.body.nextAppointment && { nextAppointment: req.body.nextAppointment }),
-            ...(req.body.reason && { reason: req.body.reason }),
-            ...(req.body.notes && { notes: req.body.notes }),
+            ...(req.body.nextAppointment !== undefined && { nextAppointment: req.body.nextAppointment }),
+            ...(req.body.reason !== undefined && { reason: req.body.reason }),
+            ...(req.body.notes !== undefined && { notes: req.body.notes }),
             ...(req.body.prescriptions && { prescriptions: JSON.parse(req.body.prescriptions) }),
         };
 

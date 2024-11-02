@@ -3,6 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { getVets, createVet, updateVet, deleteVet, getVetVisits, createVetVisit, updateVetVisit, deleteVetVisit } from '@/lib/api';
 import { toast } from 'react-toastify';
+import VetTabs from './VetTabs/index';
+import AddVetForm from './VetForms/addVetForm';
+import EditVetForm from './VetForms/editVetForm';
+import AddVisitForm from './VetVisitForms/addVisitForm';
+import EditVisitForm from './VetVisitForms/editVisitForm';
 import styles from './VetManager.module.css';
 
 const VetManager = ({ pet }) => {
@@ -13,20 +18,13 @@ const VetManager = ({ pet }) => {
     const [showDocuments, setShowDocuments] = useState(false);
     const [visits, setVisits] = useState([]);
     const [editingVisit, setEditingVisit] = useState(null);
+    const [isVisitFormOpen, setIsVisitFormOpen] = useState(false);
     const [formData, setFormData] = useState({
         clinicName: '',
         vetName: '',
-        address: {
-            street: '',
-            city: '',
-            zipCode: ''
-        },
-        contactInfo: {
-            email: '',
-            phone: ''
-        }
+        address: { street: '', city: '', zipCode: '' },
+        contactInfo: { email: '', phone: '' }
     });
-
     const [visitFormData, setVisitFormData] = useState({
         dateOfVisit: '',
         nextAppointment: '',
@@ -37,7 +35,7 @@ const VetManager = ({ pet }) => {
 
     useEffect(() => {
         fetchVets();
-    }, [pet._id]); // Added pet._id dependency
+    }, [pet._id]);
 
     useEffect(() => {
         if (selectedVet) {
@@ -100,7 +98,7 @@ const VetManager = ({ pet }) => {
         });
     };
 
-    const handleChange = (e) => {
+    const handleVetFormChange = (e) => {
         const { name, value } = e.target;
         if (name.includes('.')) {
             const [section, field] = name.split('.');
@@ -119,7 +117,15 @@ const VetManager = ({ pet }) => {
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleVisitFormChange = (e) => {
+        const { name, value } = e.target;
+        setVisitFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleAddVet = async (e) => {
         e.preventDefault();
         try {
             await createVet(pet._id, formData);
@@ -157,6 +163,7 @@ const VetManager = ({ pet }) => {
             }
             fetchVetVisits();
             setEditingVisit(null);
+            setIsVisitFormOpen(false);
             setVisitFormData({
                 dateOfVisit: '',
                 nextAppointment: '',
@@ -183,12 +190,13 @@ const VetManager = ({ pet }) => {
 
     const handleEditVisit = (visit) => {
         setEditingVisit(visit);
+        setIsVisitFormOpen(true);
         setVisitFormData({
             dateOfVisit: visit.dateOfVisit.split('T')[0],
             nextAppointment: visit.nextAppointment ? visit.nextAppointment.split('T')[0] : '',
             reason: visit.reason,
             notes: visit.notes,
-            prescriptions: visit.prescriptions
+            prescriptions: visit.prescriptions || []
         });
     };
 
@@ -232,15 +240,15 @@ const VetManager = ({ pet }) => {
                         ))}
                     </div>
 
-                    {editingVisit ? (
-                        <form onSubmit={handleVisitSubmit} className={styles.visitForm}>
-                            {/* Visit form fields */}
-                            <button type="submit">Update Visit</button>
-                            <button type="button" onClick={() => setEditingVisit(null)}>Cancel</button>
-                        </form>
-                    ) : (
-                        <button onClick={() => setEditingVisit({})}>Add Visit</button>
-                    )}
+                    <button 
+                        className={styles.addButton}
+                        onClick={() => {
+                            setEditingVisit(null);
+                            setIsVisitFormOpen(true);
+                        }}
+                    >
+                        Add Visit
+                    </button>
                 </div>
 
                 <div className={styles.documentSection}>
@@ -274,119 +282,54 @@ const VetManager = ({ pet }) => {
         );
     };
 
-
-    const renderVetForm = () => (
-        <form onSubmit={handleSubmit} className={styles.vetForm}>
-            <div className={styles.formGroup}>
-                <label>Clinic Name:</label>
-                <input
-                    type="text"
-                    name="clinicName"
-                    value={formData.clinicName}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-
-            <div className={styles.formGroup}>
-                <label>Veterinarian Name:</label>
-                <input
-                    type="text"
-                    name="vetName"
-                    value={formData.vetName}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-
-            <div className={styles.formGroup}>
-                <label>Street:</label>
-                <input
-                    type="text"
-                    name="address.street"
-                    value={formData.address.street}
-                    onChange={handleChange}
-                />
-            </div>
-
-            <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                    <label>City:</label>
-                    <input
-                        type="text"
-                        name="address.city"
-                        value={formData.address.city}
-                        onChange={handleChange}
-                    />
-                </div>
-                <div className={styles.formGroup}>
-                    <label>Zip Code:</label>
-                    <input
-                        type="text"
-                        name="address.zipCode"
-                        value={formData.address.zipCode}
-                        onChange={handleChange}
-                    />
-                </div>
-            </div>
-
-            <div className={styles.formGroup}>
-                <label>Email:</label>
-                <input
-                    type="email"
-                    name="contactInfo.email"
-                    value={formData.contactInfo.email}
-                    onChange={handleChange}
-                />
-            </div>
-
-            <div className={styles.formGroup}>
-                <label>Phone:</label>
-                <input
-                    type="tel"
-                    name="contactInfo.phone"
-                    value={formData.contactInfo.phone}
-                    onChange={handleChange}
-                    required
-                />
-            </div>
-
-            <button type="submit">Add Veterinarian</button>
-        </form>
-    );
-
     return (
         <div className={styles.vetManager}>
-            <div className={styles.tabs}>
-                {vets.map(vet => (
-                    <button
-                        key={vet._id}
-                        className={`${styles.tab} ${activeTab === vet._id ? styles.active : ''}`}
-                        onClick={() => handleTabClick(vet._id)}
-                    >
-                        {vet.clinicName}
-                        <button 
-                            className={styles.deleteVetButton}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteVet(vet._id);
-                            }}
-                        >
-                            ×
-                        </button>
-                    </button>
-                ))}
-                <button
-                    className={`${styles.tab} ${activeTab === 'add' ? styles.active : ''}`}
-                    onClick={() => handleTabClick('add')}
-                >
-                    + Add Vet
-                </button>
-            </div>
+            <VetTabs
+                vets={vets}
+                activeTab={activeTab}
+                onTabClick={handleTabClick}
+                onDeleteVet={handleDeleteVet}
+            />
 
             <div className={styles.content}>
-                {isAddingVet ? renderVetForm() : renderVetInfo(selectedVet)}
+                {isAddingVet ? (
+                    <AddVetForm
+                        formData={formData}
+                        onChange={handleVetFormChange}
+                        onSubmit={handleAddVet}
+                    />
+                ) : (
+                    renderVetInfo(selectedVet)
+                )}
             </div>
+
+            <AddVisitForm
+                visitData={visitFormData}
+                onInputChange={handleVisitFormChange}
+                onSubmit={handleVisitSubmit}
+                onCancel={() => {
+                    setIsVisitFormOpen(false);
+                    setVisitFormData({
+                        dateOfVisit: '',
+                        nextAppointment: '',
+                        reason: '',
+                        notes: '',
+                        prescriptions: []
+                    });
+                }}
+                isOpen={isVisitFormOpen && !editingVisit}
+            />
+
+            <EditVisitForm
+                visitData={visitFormData}
+                onInputChange={handleVisitFormChange}
+                onSubmit={handleVisitSubmit}
+                onCancel={() => {
+                    setEditingVisit(null);
+                    setIsVisitFormOpen(false);
+                }}
+                isOpen={isVisitFormOpen && editingVisit}
+            />
         </div>
     );
 };

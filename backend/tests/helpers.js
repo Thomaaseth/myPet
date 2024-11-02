@@ -102,8 +102,6 @@ const createTestVetVisit = async (pet, vet, overrides = {}) => {
     return visit;
 };
 
-
-
 module.exports = {
     createTestUser,
     createPetTestUser,

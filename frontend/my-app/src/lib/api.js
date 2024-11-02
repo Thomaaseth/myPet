@@ -263,9 +263,33 @@ export const getVetVisits = async (petId, vetId) => {
 
 export const createVetVisit = async (petId, vetId, visitData) => {
     try {
+        // Create FormData object to handle file uploads properly
+        const formData = new FormData();
+        
+        // Handle files if they exist
+        if (visitData.documents) {
+            visitData.documents.forEach(file => {
+                formData.append('documents', file);
+            });
+            delete visitData.documents; // Remove from main data object
+        }
+        
+        Object.keys(visitData).forEach(key => {
+            if (key === 'prescriptions' && visitData[key]) {
+                formData.append(key, JSON.stringify(visitData[key]));
+            } else {
+                formData.append(key, visitData[key]);
+            }
+        });
+
         const response = await api.post(
             `/api/pets/${petId}/vets/${vetId}/visits`, 
-            visitData
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            }
         );
         return response.data;
     } catch (error) {
@@ -276,9 +300,43 @@ export const createVetVisit = async (petId, vetId, visitData) => {
 
 export const updateVetVisit = async (petId, vetId, visitId, visitData) => {
     try {
+        const formData = new FormData();
+        
+        // Handle files if they exist
+        if (visitData.documents) {
+            visitData.documents.forEach(file => {
+                // Only append if it's a File object (new file)
+                if (file instanceof File) {
+                    formData.append('documents', file);
+                }
+            });
+            delete visitData.documents;
+        }
+        
+        Object.keys(visitData).forEach(key => {
+            if (key === 'prescriptions' && visitData[key]) {
+                formData.append(key, JSON.stringify(visitData[key]));
+            } else if (visitData[key] !== null && visitData[key] !== undefined) {
+                formData.append(key, visitData[key]);
+            }
+            // Handle empty strings explicitly
+            else if (visitData[key] === '') {
+            formData.append(key, ''); // Explicitly append empty string
+            }
+            // Handle all other non-null/undefined values
+            else if (visitData[key] !== null && visitData[key] !== undefined) {
+            formData.append(key, visitData[key]);
+            }
+        });
+
         const response = await api.put(
             `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`, 
-            visitData
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            }
         );
         return response.data;
     } catch (error) {

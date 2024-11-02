@@ -31,6 +31,10 @@ const vetSchema = new mongoose.Schema({
     pets: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pet'
+    }],
+    visits: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'VetVisit' 
     }]
 }, { timestamps: true });
 
