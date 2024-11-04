@@ -1,0 +1,86 @@
+.vetWidget {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.manageLink {
+    color: #0070f3;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.manageLink:hover {
+    text-decoration: underline;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.primaryVet,
+.nextVisit {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.primaryVet label,
+.nextVisit label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.primaryVet span,
+.nextVisit span {
+    font-weight: 500;
+    color: #333;
+}
+
+.visitReason {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+}
+
+.noVet {
+    text-align: center;
+    padding: 15px 0;
+}
+
+.noVet p {
+    color: #666;
+    margin: 0 0 12px 0;
+}
+
+.addVetButton {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #0070f3;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.addVetButton:hover {
+    background-color: #0051a2;
+}

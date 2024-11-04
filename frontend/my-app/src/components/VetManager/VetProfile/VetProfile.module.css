@@ -1,0 +1,45 @@
+
+.visitActions button,
+.addButton,
+.documentsButton,
+.uploadButton {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.addButton,
+.uploadButton {
+  background: #0070f3;
+  color: white;
+}
+
+.addButton:hover,
+.uploadButton:hover {
+  background: #0051a2;
+}
+
+.documentsButton {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.documentsButton:hover {
+  background: #e0e0e0;
+}
+
+.documentSection {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.documentsContainer {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}

@@ -36,6 +36,8 @@ const Navbar = () => {
                             <Link href="/mypets" className={styles.navLink}>
                                 My Pets
                             </Link>
+                            <Link href="/myVets" className={styles.navLink}>My Vets</Link>
+
                             <Link href="/profile" className={styles.navLink}>
                                 My Profile
                             </Link>

@@ -1,0 +1,58 @@
+.vetDetails {
+    margin-top: 20px;
+}
+
+.vetHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.vetHeader h2 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.vetActions {
+    display: flex;
+    gap: 10px;
+}
+
+.vetActions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.vetActions button:first-child {
+    background: #0070f3;
+    color: white;
+}
+
+.vetActions button:first-child:hover {
+    background: #0051a2;
+}
+
+.vetActions button:last-child {
+    background: #ff4444;
+    color: white;
+}
+
+.vetActions button:last-child:hover {
+    background: #cc0000;
+}
+
+.vetContent {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Container spacing for visit forms */
+.visitFormsContainer {
+    position: relative;  /* For modal positioning */
+}
