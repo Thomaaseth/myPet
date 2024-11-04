@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from "react";
 import { getPets, createPet, updatePet, deletePet, getSpeciesList } from '../../lib/api'
 import PetDetailsLayout from '@/components/layouts/PetDetailsLayout';
-import PetTabs from "@/components/PetTabs";
-import AddPetForm from "@/components/PetForms/addPetForm";
-import EditPetForm from "@/components/PetForms/editPetForm";
+import PetTabs from "@/components/PetManager/PetTabs";
+import AddPetForm from "@/components/PetManager/PetForms/addPetForm";
+import EditPetForm from "@/components/PetManager/PetForms/editPetForm";
 import { toast } from "react-toastify";
 import styles from './Pets.module.css'
 import { TOAST_MESSAGES } from "@/utils/toastMessage";

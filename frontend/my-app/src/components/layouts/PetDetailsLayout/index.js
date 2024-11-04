@@ -1,9 +1,9 @@
 "use client"
 
 import React from "react"
-import PetProfile from "@/components/PetProfile"
-import WeightTracker from "@/components/WeightTracker"
-import VetWidget from "@/components/VetWidget"
+import PetProfile from "@/components/PetManager/PetProfile"
+import WeightTracker from "@/components/PetManager/WeightTracker"
+import VetWidget from "@/components/PetManager/VetWidget"
 import styles from './PetDetailsLayout.module.css'
 
 const PetDetailsLayout = ({
