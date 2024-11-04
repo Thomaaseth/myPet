@@ -18,7 +18,7 @@ const VetWidget = ({ pet }) => {
                 <h3>Veterinary Care</h3>
                 {primaryVet && (
                     <Link 
-                        href={`/myVets?petId=${pet._id}`}
+                        href={`/myvets?petId=${pet._id}`}
                         className={styles.manageLink}
                     >
                         Manage
@@ -44,7 +44,7 @@ const VetWidget = ({ pet }) => {
                 <div className={styles.noVet}>
                     <p>No veterinarian assigned</p>
                     <Link 
-                        href={`/myVets?petId=${pet._id}&action=add`}
+                        href={`/myvets?petId=${pet._id}&action=add`}
                         className={styles.addVetButton}
                     >
                         Add Veterinarian

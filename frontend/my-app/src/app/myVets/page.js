@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { getVets, getPets, createVet, updateVet, deleteVet, getVetVisits, createVetVisit, updateVetVisit, deleteVetVisit } from '@/lib/api';
 import { toast } from 'react-toastify';
+import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
 import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
 import EditVetForm from '@/components/VetManager/VetForms/editVetForm';
@@ -51,6 +52,13 @@ const MyVets = ({ pet }) => {
     useEffect(() => {
         fetchPets();
     }, []);
+
+    useEffect(() => {
+        if (pets.length > 0 && !petId) {
+            const firstPet = pets[0];
+            router.push(`/myvets?petId=${firstPet._id}`);
+        }
+    }, [pets]);
 
     useEffect(() => {
         if (action === 'add') {
@@ -113,41 +121,6 @@ const MyVets = ({ pet }) => {
             toast.error('Failed to fetch visits');
         }
     };
-
-       // If no pet is selected, show pet selector
-       if (!petId) {
-        return (
-            <div className={styles.myVets}>
-                <h1>My Veterinarians</h1>
-                <div className={styles.petSelector}>
-                    <h2>Select a Pet</h2>
-                    {pets.length > 0 ? (
-                        <>
-                            <p>Please select a pet to manage their veterinary care:</p>
-                            <select 
-                                onChange={(e) => router.push(`/myVets?petId=${e.target.value}`)}
-                                className={styles.petSelect}
-                            >
-                                <option value="">Choose a pet...</option>
-                                {pets.map(pet => (
-                                    <option key={pet._id} value={pet._id}>
-                                        {pet.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </>
-                    ) : (
-                        <div className={styles.noPets}>
-                            <p>You need to add a pet first before managing veterinary care.</p>
-                            <Link href="/mypets" className={styles.addPetLink}>
-                                Add a Pet
-                            </Link>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    }
 
     const handleTabClick = (vetId) => {
         if (vetId === 'add') {
@@ -312,49 +285,70 @@ const MyVets = ({ pet }) => {
                     Back to Pet Profile
                 </Link>
             </div>
-            
-            <VetTabs 
-                vets={vets}
-                activeTab={activeTab}
-                onTabClick={handleTabClick}
-                onDeleteVet={handleDeleteVet}
-            />
-
-            <div className={styles.content}>
-                {isAddingVet ? (
-                    <AddVetForm
-                        formData={formData}
-                        onChange={handleVetFormChange}
-                        onSubmit={handleAddVet}
+    
+            {pets.length > 0 ? (
+                <>
+                    <PetTabs 
+                        pets={pets}
+                        selectedPetId={petId} 
+                        onSelectPet={(petId) => router.push(`/myvets?petId=${petId}`)}
                     />
-                ) : selectedVet ? (
-                    <VetDetailsLayout
-                        vet={selectedVet}
-                        visits={visits}
-                        onEdit={() => setEditingVet(selectedVet)}
-                        onDelete={() => handleDeleteVet(selectedVet._id)}
-                        onEditVisit={handleEditVisit}
-                        onDeleteVisit={handleDeleteVisit}
-                        onAddVisit={() => {
-                            setEditingVisit(null);
-                            setIsVisitFormOpen(true);
-                        }}
-                        showDocuments={showDocuments}
-                        onToggleDocuments={handleToggleDocuments}
-                        onUploadDocument={handleUploadDocument}
-                        visitFormData={visitFormData}
-                        onVisitFormChange={handleVisitFormChange}
-                        onVisitSubmit={handleVisitSubmit}
-                        onVisitCancel={() => {
-                            setEditingVisit(null);
-                            setIsVisitFormOpen(false);
-                        }}
-                        isVisitFormOpen={isVisitFormOpen}
-                        editingVisit={editingVisit}
-                    />
-                ) : null }
-            </div>
-
+    
+                    {petId && (
+                        <>
+                            <VetTabs 
+                                vets={vets}
+                                activeTab={activeTab}
+                                onTabClick={handleTabClick}
+                                onDeleteVet={handleDeleteVet}
+                            />
+    
+                            <div className={styles.content}>
+                                {isAddingVet ? (
+                                    <AddVetForm
+                                        formData={formData}
+                                        onChange={handleVetFormChange}
+                                        onSubmit={handleAddVet}
+                                    />
+                                ) : selectedVet ? (
+                                    <VetDetailsLayout
+                                        vet={selectedVet}
+                                        visits={visits}
+                                        onEdit={() => setEditingVet(selectedVet)}
+                                        onDelete={() => handleDeleteVet(selectedVet._id)}
+                                        onEditVisit={handleEditVisit}
+                                        onDeleteVisit={handleDeleteVisit}
+                                        onAddVisit={() => {
+                                            setEditingVisit(null);
+                                            setIsVisitFormOpen(true);
+                                        }}
+                                        showDocuments={showDocuments}
+                                        onToggleDocuments={handleToggleDocuments}
+                                        onUploadDocument={handleUploadDocument}
+                                        visitFormData={visitFormData}
+                                        onVisitFormChange={handleVisitFormChange}
+                                        onVisitSubmit={handleVisitSubmit}
+                                        onVisitCancel={() => {
+                                            setEditingVisit(null);
+                                            setIsVisitFormOpen(false);
+                                        }}
+                                        isVisitFormOpen={isVisitFormOpen}
+                                        editingVisit={editingVisit}
+                                    />
+                                ) : null}
+                            </div>
+                        </>
+                    )}
+                </>
+            ) : (
+                <div className={styles.noPets}>
+                    <p>You need to add a pet first before managing veterinary care.</p>
+                    <Link href="/mypets" className={styles.addPetLink}>
+                        Add a Pet
+                    </Link>
+                </div>
+            )}
+    
             {editingVet && (
                 <EditVetForm
                     formData={editingVet}
