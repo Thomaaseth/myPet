@@ -9,9 +9,6 @@ import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
 import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
 import EditVetForm from '@/components/VetManager/VetForms/editVetForm';
-// import AddVisitForm from '@/components/VetManager/VetVisitForms/addVisitForm';
-// import EditVisitForm from '@/components/VetManager/VetVisitForms/editVisitForm';
-// import VetProfile from '@/components/VetManager/components/VetProfile';
 import VetDetailsLayout from '@/components/layouts/VetDetailsLayout';
 import styles from './Vets.module.css';
 
@@ -170,6 +167,33 @@ const MyVets = ({ pet }) => {
                 [name]: value
             }));
         }
+    };
+
+    const handleEditVetFormChange = (e) => {
+        const { name, value } = e.target;
+        if (name.includes('.')) {
+            const [section, field] = name.split('.');
+            setEditingVet(prev => ({
+                ...prev,
+                [section]: {
+                    ...prev[section],
+                    [field]: value
+                }
+            }));
+        } else {
+            setEditingVet(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
+    };
+
+    const handleEdit = () => {
+        setEditingVet({
+            ...selectedVet,
+            address: { ...selectedVet.address },
+            contactInfo: { ...selectedVet.contactInfo }
+        });
     };
 
     const handleVisitFormChange = (e) => {
@@ -352,7 +376,7 @@ const MyVets = ({ pet }) => {
             {editingVet && (
                 <EditVetForm
                     formData={editingVet}
-                    onChange={handleVetFormChange}
+                    onChange={handleEditVetFormChange}
                     onSubmit={handleUpdateVet}
                     onCancel={() => setEditingVet(null)}
                 />

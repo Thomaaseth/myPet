@@ -10,12 +10,16 @@ const VetTabs = ({
   return (
     <div className={styles.vetTabs}>
       {vets.map(vet => (
-        <button
+        <div
           key={vet._id}
           className={`${styles.vetTab} ${activeTab === vet._id ? styles.active : ''}`}
-          onClick={() => onTabClick(vet._id)}
         >
-          {vet.clinicName}
+          <button 
+            className={styles.tabButton}
+            onClick={() => onTabClick(vet._id)}
+          >
+            {vet.clinicName}
+          </button>
           <button 
             className={styles.deleteButton}
             onClick={(e) => {
@@ -25,7 +29,7 @@ const VetTabs = ({
           >
             ×
           </button>
-        </button>
+        </div>
       ))}
       <button
         className={`${styles.vetTab} ${activeTab === 'add' ? styles.active : ''}`}
