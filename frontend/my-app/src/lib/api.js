@@ -90,8 +90,32 @@ export const deleteAccount = async () => {
 
 export const getPets = async () => {
     try {
-        const response = await api.get('/api/pets');
-        return response.data;
+        // First get all pets
+        const petsResponse = await api.get('/api/pets');
+        
+        // Then get vets for each pet
+        const petsWithVets = await Promise.all(
+            petsResponse.data.data.map(async (pet) => {
+                try {
+                    const vetsResponse = await getVets(pet._id);
+                    return {
+                        ...pet,
+                        vets: vetsResponse.data || [] // Add vets to pet object
+                    };
+                } catch (error) {
+                    console.error(`Error fetching vets for pet ${pet._id}:`, error);
+                    return {
+                        ...pet,
+                        vets: [] // Return empty array if vets fetch fails
+                    };
+                }
+            })
+        );
+
+        return {
+            ...petsResponse.data,
+            data: petsWithVets // Return modified data with vets included
+        };
     } catch (error) {
         console.error('Error fetching pets:', error.response || error);
         throw error.response ? error.response.data : error;

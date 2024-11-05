@@ -11,6 +11,7 @@ import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
 import EditVetForm from '@/components/VetManager/VetForms/editVetForm';
 import VetDetailsLayout from '@/components/layouts/VetDetailsLayout';
 import styles from './Vets.module.css';
+import { FaSleigh } from 'react-icons/fa';
 
 const MyVets = ({ pet }) => {
     const router = useRouter();
@@ -22,9 +23,8 @@ const MyVets = ({ pet }) => {
     const [selectedPet, setSelectedPet] = useState(null);
     const [vets, setVets] = useState([]);
     const [editingVet, setEditingVet] = useState(null);
-
     const [activeTab, setActiveTab] = useState('add');
-    const [isAddingVet, setIsAddingVet] = useState(true);
+    const [isAddingVet, setIsAddingVet] = useState(false);
     const [selectedVet, setSelectedVet] = useState(null);
     const [showDocuments, setShowDocuments] = useState(false);
     const [visits, setVisits] = useState([]);
@@ -68,6 +68,10 @@ const MyVets = ({ pet }) => {
         if (petId && pets.length > 0) {
             const pet = pets.find(p => p._id === petId);
             if (pet) {
+                // Reset states before fetching new pet's vets
+                setSelectedVet(null);
+                setActiveTab('add');
+                setIsAddingVet(true);
                 setSelectedPet(pet);
                 fetchVetsForPet(petId);
             } else {
@@ -95,9 +99,16 @@ const MyVets = ({ pet }) => {
                 setActiveTab(response.data[0]._id);
                 setSelectedVet(response.data[0]);
                 setIsAddingVet(false);
+            } else {
+                setActiveTab('add');
+                setSelectedVet(null);
+                setIsAddingVet(false);
             }
         } catch (error) {
             toast.error('Failed to fetch veterinarians');
+            setActiveTab('add');
+            setSelectedVet(null);
+            setIsAddingVet(false);
         } finally {
             setIsLoading(false);
         }
@@ -121,7 +132,7 @@ const MyVets = ({ pet }) => {
 
     const handleTabClick = (vetId) => {
         if (vetId === 'add') {
-            setIsAddingVet(true);
+            setIsAddingVet(prev => !prev);
             setSelectedVet(null);
             resetForm();
         } else {
@@ -359,7 +370,12 @@ const MyVets = ({ pet }) => {
                                         isVisitFormOpen={isVisitFormOpen}
                                         editingVisit={editingVisit}
                                     />
-                                ) : null}
+                                ) : (
+                                <div className={styles.noVetSelected}>
+                                    <p>No veterinarian selected. Click the "+" tab to add a new veterinarian.</p>
+                                </div>
+                                )
+                                }
                             </div>
                         </>
                     )}

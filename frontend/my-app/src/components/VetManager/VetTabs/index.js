@@ -5,7 +5,6 @@ const VetTabs = ({
   vets,
   activeTab,
   onTabClick,
-  onDeleteVet
 }) => {
   return (
     <div className={styles.vetTabs}>
@@ -20,19 +19,10 @@ const VetTabs = ({
           >
             {vet.clinicName}
           </button>
-          <button 
-            className={styles.deleteButton}
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteVet(vet._id);
-            }}
-          >
-            ×
-          </button>
         </div>
       ))}
       <button
-        className={`${styles.vetTab} ${activeTab === 'add' ? styles.active : ''}`}
+        className={`${styles.addVetTab} ${activeTab === 'add' ? styles.active : ''}`}
         onClick={() => onTabClick('add')}
       >
         + Add Vet
