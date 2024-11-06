@@ -93,20 +93,39 @@ export const getPets = async () => {
         // First get all pets
         const petsResponse = await api.get('/api/pets');
         
-        // Then get vets for each pet
-        const petsWithVets = await Promise.all(
+        // Then get vets and their visits for each pet
+        const petsWithVetsAndVisits = await Promise.all(
             petsResponse.data.data.map(async (pet) => {
                 try {
                     const vetsResponse = await getVets(pet._id);
+                    
+                    // Get visits for each vet
+                    const vetsWithVisits = await Promise.all(
+                        vetsResponse.data.map(async (vet) => {
+                            try {
+                                const visitsResponse = await getVetVisits(pet._id, vet._id);
+                                return {
+                                    ...vet,
+                                    visits: visitsResponse.data || []
+                                };
+                            } catch (error) {
+                                console.error(`Error fetching visits for vet ${vet._id}:`, error);
+                                return {
+                                    ...vet,
+                                    visits: []
+                                };
+                            }
+                        })
+                    );
                     return {
                         ...pet,
-                        vets: vetsResponse.data || [] // Add vets to pet object
+                        vets: vetsWithVisits
                     };
                 } catch (error) {
                     console.error(`Error fetching vets for pet ${pet._id}:`, error);
                     return {
                         ...pet,
-                        vets: [] // Return empty array if vets fetch fails
+                        vets: []
                     };
                 }
             })
@@ -114,7 +133,7 @@ export const getPets = async () => {
 
         return {
             ...petsResponse.data,
-            data: petsWithVets // Return modified data with vets included
+            data: petsWithVetsAndVisits
         };
     } catch (error) {
         console.error('Error fetching pets:', error.response || error);
