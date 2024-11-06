@@ -2,8 +2,7 @@
 
 import React from "react"
 import VetProfile from "@/components/VetManager/VetProfile"
-import AddVisitForm from "@/components/VetManager/VetVisitForms/addVisitForm"
-import EditVisitForm from "@/components/VetManager/VetVisitForms/editVisitForm"
+import VisitManager from "@/components/VetManager/VisitManager/"
 import styles from './VetDetailsLayout.module.css'
 
 const VetDetailsLayout = ({
@@ -14,17 +13,8 @@ const VetDetailsLayout = ({
     onEditVisit,
     onDeleteVisit,
     onAddVisit,
-    showDocuments,
-    onToggleDocuments,
     onUploadDocument,
-    visitFormData,
-    onVisitFormChange,
-    onVisitSubmit,
-    onVisitCancel,
-    isVisitFormOpen,
-    editingVisit,
 }) => {
-
   return (
     <div className={styles.vetDetails}>
       <div className={styles.vetHeader}>
@@ -36,31 +26,13 @@ const VetDetailsLayout = ({
       </div>
 
       <div className={styles.vetContent}>
-        <VetProfile
-          vet={vet}
+        <VetProfile vet={vet} />
+        <VisitManager
           visits={visits}
+          onAddVisit={onAddVisit}
           onEditVisit={onEditVisit}
           onDeleteVisit={onDeleteVisit}
-          onAddVisit={onAddVisit}
-          showDocuments={showDocuments}
-          onToggleDocuments={onToggleDocuments}
           onUploadDocument={onUploadDocument}
-        />
-
-        <AddVisitForm
-          visitData={visitFormData}
-          onInputChange={onVisitFormChange}
-          onSubmit={onVisitSubmit}
-          onCancel={onVisitCancel}
-          isOpen={isVisitFormOpen && !editingVisit}
-        />
-
-        <EditVisitForm
-          visitData={visitFormData}
-          onInputChange={onVisitFormChange}
-          onSubmit={onVisitSubmit}
-          onCancel={onVisitCancel}
-          isOpen={isVisitFormOpen && editingVisit}
         />
       </div>
     </div>

@@ -297,7 +297,15 @@ export const deleteVet = async (petId, vetId) => {
 export const getVetVisits = async (petId, vetId) => {
     try {
         const response = await api.get(`/api/pets/${petId}/vets/${vetId}/visits`);
-        return response.data;
+        // Sort visits into past and upcoming based on date
+        const visits = response.data.data || [];
+        return {
+            ...response,
+            data: visits.map(visit => ({
+                ...visit,
+                isUpcoming: new Date(visit.dateOfVisit) > new Date()
+            }))
+        };
     } catch (error) {
         console.error('Error fetching vet visits:', error.response || error);
         throw error.response ? error.response.data : error;

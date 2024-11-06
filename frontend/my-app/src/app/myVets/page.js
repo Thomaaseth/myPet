@@ -11,9 +11,8 @@ import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
 import EditVetForm from '@/components/VetManager/VetForms/editVetForm';
 import VetDetailsLayout from '@/components/layouts/VetDetailsLayout';
 import styles from './Vets.module.css';
-import { FaSleigh } from 'react-icons/fa';
 
-const MyVets = ({ pet }) => {
+const MyVets = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const petId = searchParams.get('petId');
@@ -26,23 +25,13 @@ const MyVets = ({ pet }) => {
     const [activeTab, setActiveTab] = useState('add');
     const [isAddingVet, setIsAddingVet] = useState(false);
     const [selectedVet, setSelectedVet] = useState(null);
-    const [showDocuments, setShowDocuments] = useState(false);
     const [visits, setVisits] = useState([]);
-    const [editingVisit, setEditingVisit] = useState(null);
-    const [isVisitFormOpen, setIsVisitFormOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [formData, setFormData] = useState({
         clinicName: '',
         vetName: '',
         address: { street: '', city: '', zipCode: '' },
         contactInfo: { email: '', phone: '' }
-    });
-    const [visitFormData, setVisitFormData] = useState({
-        dateOfVisit: '',
-        nextAppointment: '',
-        reason: '',
-        notes: '',
-        prescriptions: []
     });
 
     // Fetch all pets
@@ -68,7 +57,6 @@ const MyVets = ({ pet }) => {
         if (petId && pets.length > 0) {
             const pet = pets.find(p => p._id === petId);
             if (pet) {
-                // Reset states before fetching new pet's vets
                 setSelectedVet(null);
                 setActiveTab('add');
                 setIsAddingVet(true);
@@ -152,13 +140,6 @@ const MyVets = ({ pet }) => {
             address: { street: '', city: '', zipCode: '' },
             contactInfo: { email: '', phone: '' }
         });
-        setVisitFormData({
-            dateOfVisit: '',
-            nextAppointment: '',
-            reason: '',
-            notes: '',
-            prescriptions: []
-        });
     };
 
     const handleVetFormChange = (e) => {
@@ -199,23 +180,6 @@ const MyVets = ({ pet }) => {
         }
     };
 
-    const handleEdit = () => {
-        setEditingVet({
-            ...selectedVet,
-            address: { ...selectedVet.address },
-            contactInfo: { ...selectedVet.contactInfo }
-        });
-    };
-
-    const handleVisitFormChange = (e) => {
-        const { name, value } = e.target;
-        setVisitFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    
     const handleAddVet = async (e) => {
         e.preventDefault();
         try {
@@ -255,28 +219,25 @@ const MyVets = ({ pet }) => {
         }
     };
 
-    const handleVisitSubmit = async (e) => {
-        e.preventDefault();
+    const handleAddVisit = async (visitData) => {
         try {
-            if (editingVisit) {
-                await updateVetVisit(selectedPet._id, selectedVet._id, editingVisit._id, visitFormData);
-                toast.success('Visit updated successfully');
-            } else {
-                await createVetVisit(selectedPet._id, selectedVet._id, visitFormData);
-                toast.success('Visit added successfully');
-            }
+            await createVetVisit(selectedPet._id, selectedVet._id, visitData);
+            toast.success('Visit added successfully');
             fetchVetVisits();
-            setEditingVisit(null);
-            setIsVisitFormOpen(false);
-            setVisitFormData({
-                dateOfVisit: '',
-                nextAppointment: '',
-                reason: '',
-                notes: '',
-                prescriptions: []
-            });
         } catch (error) {
-            toast.error(editingVisit ? 'Failed to update visit' : 'Failed to add visit');
+            toast.error('Failed to add visit');
+            throw error;
+        }
+    };
+
+    const handleEditVisit = async (visitId, visitData) => {
+        try {
+            await updateVetVisit(selectedPet._id, selectedVet._id, visitId, visitData);
+            toast.success('Visit updated successfully');
+            fetchVetVisits();
+        } catch (error) {
+            toast.error('Failed to update visit');
+            throw error;
         }
     };
 
@@ -288,35 +249,16 @@ const MyVets = ({ pet }) => {
                 fetchVetVisits();
             } catch (error) {
                 toast.error('Failed to delete visit');
+                throw error;
             }
         }
-    };
-
-    const handleEditVisit = (visit) => {
-        setEditingVisit(visit);
-        setIsVisitFormOpen(true);
-        setVisitFormData({
-            dateOfVisit: visit.dateOfVisit.split('T')[0],
-            nextAppointment: visit.nextAppointment ? visit.nextAppointment.split('T')[0] : '',
-            reason: visit.reason,
-            notes: visit.notes,
-            prescriptions: visit.prescriptions || []
-        });
-    };
-
-    const handleToggleDocuments = () => {
-        setShowDocuments(!showDocuments);
-    };
-
-    const handleUploadDocument = async (files) => {
-        // Document upload logic here
     };
 
     return (
         <div className={styles.myVets}>
             <div className={styles.header}>
                 <h1>Veterinary Care for {selectedPet?.name}</h1>
-                <Link href={`/mypets`} className={styles.backLink}>
+                <Link href="/mypets" className={styles.backLink}>
                     Back to Pet Profile
                 </Link>
             </div>
@@ -351,31 +293,15 @@ const MyVets = ({ pet }) => {
                                         visits={visits}
                                         onEdit={() => setEditingVet(selectedVet)}
                                         onDelete={() => handleDeleteVet(selectedVet._id)}
+                                        onAddVisit={handleAddVisit}
                                         onEditVisit={handleEditVisit}
                                         onDeleteVisit={handleDeleteVisit}
-                                        onAddVisit={() => {
-                                            setEditingVisit(null);
-                                            setIsVisitFormOpen(true);
-                                        }}
-                                        showDocuments={showDocuments}
-                                        onToggleDocuments={handleToggleDocuments}
-                                        onUploadDocument={handleUploadDocument}
-                                        visitFormData={visitFormData}
-                                        onVisitFormChange={handleVisitFormChange}
-                                        onVisitSubmit={handleVisitSubmit}
-                                        onVisitCancel={() => {
-                                            setEditingVisit(null);
-                                            setIsVisitFormOpen(false);
-                                        }}
-                                        isVisitFormOpen={isVisitFormOpen}
-                                        editingVisit={editingVisit}
                                     />
                                 ) : (
-                                <div className={styles.noVetSelected}>
-                                    <p>No veterinarian selected. Click the "+" tab to add a new veterinarian.</p>
-                                </div>
-                                )
-                                }
+                                    <div className={styles.noVetSelected}>
+                                        <p>No veterinarian selected. Click the "+" tab to add a new veterinarian.</p>
+                                    </div>
+                                )}
                             </div>
                         </>
                     )}

@@ -1,33 +1,34 @@
 import React from 'react';
 import styles from './VetVisitForms.module.css';
 
-const AddVisitForm = ({
+const PastVisitForm = ({
   visitData,
   onInputChange,
   onSubmit,
   onCancel,
-  isOpen
+  isOpen,
+  onDocumentUpload
 }) => {
   if (!isOpen) return null;
 
-  const handleAddPrescription = () => {
-    const prescriptionInput = document.getElementById('newPrescription');
-    if (prescriptionInput.value.trim()) {
+
+  const handleDocumentUpload = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
       onInputChange({
         target: {
-          name: 'prescriptions',
-          value: [...visitData.prescriptions, prescriptionInput.value.trim()]
+          name: 'documents',
+          value: [...(visitData.documents || []), ...files]
         }
       });
-      prescriptionInput.value = '';
     }
   };
 
-  const handleRemovePrescription = (index) => {
+  const handleRemoveDocument = (index) => {
     onInputChange({
       target: {
-        name: 'prescriptions',
-        value: visitData.prescriptions.filter((_, i) => i !== index)
+        name: 'documents',
+        value: visitData.documents.filter((_, i) => i !== index)
       }
     });
   };
@@ -50,17 +51,6 @@ const AddVisitForm = ({
               value={visitData.dateOfVisit}
               onChange={onInputChange}
               required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="nextAppointment">Next Appointment</label>
-            <input
-              type="date"
-              id="nextAppointment"
-              name="nextAppointment"
-              value={visitData.nextAppointment}
-              onChange={onInputChange}
             />
           </div>
 
@@ -88,37 +78,31 @@ const AddVisitForm = ({
           </div>
 
           <div className={styles.formGroup}>
-            <label>Prescriptions</label>
-            <div className={styles.prescriptionInput}>
-              <input
-                type="text"
-                id="newPrescription"
-                placeholder="Enter prescription"
-              />
-              <button
-                type="button"
-                onClick={handleAddPrescription}
-                className={styles.addButton}
-              >
-                Add
-              </button>
-            </div>
-            <ul className={styles.prescriptionList}>
-              {visitData.prescriptions.map((prescription, index) => (
-                <li key={index} className={styles.prescriptionItem}>
-                  <span>{prescription}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemovePrescription(index)}
-                    className={styles.removeButton}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <label>Documents</label>
+            <input
+              type="file"
+              multiple
+              onChange={handleDocumentUpload}
+              className={styles.fileInput}
+            />
+            {visitData.documents && visitData.documents.length > 0 && (
+              <ul className={styles.documentList}>
+                {visitData.documents.map((doc, index) => (
+                  <li key={index} className={styles.documentItem}>
+                    <span>{doc.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDocument(index)}
+                      className={styles.removeButton}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-        </form>
+        </form>        
 
         <div className={styles.modalFooter}>
           <button onClick={onCancel} className={styles.cancelButton}>
@@ -133,4 +117,4 @@ const AddVisitForm = ({
   );
 };
 
-export default AddVisitForm;
+export default PastVisitForm;

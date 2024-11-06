@@ -1,0 +1,82 @@
+.appointmentCard {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  
+  .cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  .cardHeader h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #111827;
+  }
+  
+  .cancelButton {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .cancelButton:hover {
+    background-color: #fecaca;
+  }
+  
+  .cardContent {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .date, .reason, .notes {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+  }
+  
+  .date strong, .reason strong, .notes strong {
+    color: #374151;
+    margin-right: 4px;
+  }
+  
+  /* Add some hover effect to the card */
+  .appointmentCard:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .appointmentCard {
+      padding: 12px;
+    }
+  
+    .cardHeader {
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+    }
+  
+    .cardHeader h3 {
+      font-size: 1rem;
+    }
+  
+    .cancelButton {
+      padding: 4px 10px;
+      font-size: 0.75rem;
+    }
+  }
