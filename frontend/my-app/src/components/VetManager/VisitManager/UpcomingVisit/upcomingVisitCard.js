@@ -1,15 +1,21 @@
 import React from 'react';
 import styles from './UpcomingVisit.module.css';
 
-const UpcomingVisitCard = ({ visit, onCancel }) => {
+const UpcomingVisitCard = ({ visit, onCancel, onEdit  }) => {
   return (
     <div className={styles.appointmentCard}>
       <div className={styles.cardHeader}>
         <h3>Next Appointment</h3>
+        <div>
+        <button onClick={() => onEdit(visit)} className={styles.editButton}>
+            Edit
+          </button>
         <button onClick={onCancel} className={styles.cancelButton}>
-          Cancel
+          Delete
         </button>
       </div>
+      </div>
+
       <div className={styles.cardContent}>
         <p className={styles.date}>
           <strong>Date:</strong> {new Date(visit.dateOfVisit).toLocaleDateString()}

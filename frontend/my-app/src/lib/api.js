@@ -312,26 +312,21 @@ export const getVetVisits = async (petId, vetId) => {
     }
 };
 
-export const createVetVisit = async (petId, vetId, visitData) => {
+export const createPastVetVisit = async (petId, vetId, visitData) => {
     try {
-        // Create FormData object to handle file uploads properly
         const formData = new FormData();
         
-        // Handle files if they exist
         if (visitData.documents) {
             visitData.documents.forEach(file => {
                 formData.append('documents', file);
             });
-            delete visitData.documents; // Remove from main data object
+            delete visitData.documents;
         }
-        
-        Object.keys(visitData).forEach(key => {
-            if (key === 'prescriptions' && visitData[key]) {
-                formData.append(key, JSON.stringify(visitData[key]));
-            } else {
-                formData.append(key, visitData[key]);
-            }
-        });
+
+        formData.append('dateOfVisit', visitData.dateOfVisit);
+        formData.append('reason', visitData.reason || '');
+        formData.append('notes', visitData.notes || '');
+        formData.append('isUpcoming', false);
 
         const response = await api.post(
             `/api/pets/${petId}/vets/${vetId}/visits`, 
@@ -349,36 +344,23 @@ export const createVetVisit = async (petId, vetId, visitData) => {
     }
 };
 
-export const updateVetVisit = async (petId, vetId, visitId, visitData) => {
+
+export const updatePastVisit = async (petId, vetId, visitId, visitData) => {
     try {
         const formData = new FormData();
         
-        // Handle files if they exist
         if (visitData.documents) {
             visitData.documents.forEach(file => {
-                // Only append if it's a File object (new file)
                 if (file instanceof File) {
                     formData.append('documents', file);
                 }
             });
-            delete visitData.documents;
         }
         
-        Object.keys(visitData).forEach(key => {
-            if (key === 'prescriptions' && visitData[key]) {
-                formData.append(key, JSON.stringify(visitData[key]));
-            } else if (visitData[key] !== null && visitData[key] !== undefined) {
-                formData.append(key, visitData[key]);
-            }
-            // Handle empty strings explicitly
-            else if (visitData[key] === '') {
-            formData.append(key, ''); // Explicitly append empty string
-            }
-            // Handle all other non-null/undefined values
-            else if (visitData[key] !== null && visitData[key] !== undefined) {
-            formData.append(key, visitData[key]);
-            }
-        });
+        formData.append('dateOfVisit', visitData.dateOfVisit);
+        formData.append('reason', visitData.reason || '');
+        formData.append('notes', visitData.notes || '');
+        formData.append('isUpcoming', false);
 
         const response = await api.put(
             `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`, 
@@ -391,30 +373,77 @@ export const updateVetVisit = async (petId, vetId, visitId, visitData) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error updating vet visit:', error.response || error);
+        console.error('Error updating past visit:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
 
-export const getAllVetVisits = async (vetId) => {
-    try {
-        const response = await api.get(`/api/vets/${vetId}/visits`);
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching all vet visits:', error.response || error);
-        throw error.response ? error.response.data : error;
-    }
-};
-
-export const deleteVetVisit = async (petId, vetId, visitId) => {
+export const deletePastVisit = async (petId, vetId, visitId) => {
     try {
         const response = await api.delete(
             `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`
         );
         return response.data;
     } catch (error) {
-        console.error('Error deleting vet visit:', error.response || error);
+        console.error('Error deleting past visit:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
 
+export const createUpcomingVisit = async (petId, vetId, visitData) => {
+    try {
+        const response = await api.post(
+            `/api/pets/${petId}/vets/${vetId}/visits`,
+            {
+                dateOfVisit: visitData.dateOfVisit,
+                reason: visitData.reason || '',
+                notes: visitData.notes || '',
+                isUpcoming: true
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error creating upcoming visit:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const updateUpcomingVisit = async (petId, vetId, visitId, visitData) => {
+    try {
+        const response = await api.put(
+            `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`,
+            {
+                dateOfVisit: visitData.dateOfVisit,
+                reason: visitData.reason || '',
+                notes: visitData.notes || '',
+                isUpcoming: true
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating upcoming visit:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const deleteUpcomingVisit = async (petId, vetId, visitId) => {
+    try {
+        const response = await api.delete(
+            `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting upcoming visit:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};

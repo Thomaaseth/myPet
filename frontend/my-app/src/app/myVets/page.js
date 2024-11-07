@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getVets, getPets, createVet, updateVet, deleteVet, getVetVisits, createVetVisit, updateVetVisit, deleteVetVisit } from '@/lib/api';
+import { getVets, getPets, createVet, updateVet, deleteVet, getVetVisits, createPastVetVisit, updatePastVisit, deletePastVisit, createUpcomingVisit, updateUpcomingVisit, deleteUpcomingVisit  } from '@/lib/api';
 import { toast } from 'react-toastify';
 import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
@@ -221,7 +221,7 @@ const MyVets = () => {
 
     const handleAddVisit = async (visitData) => {
         try {
-            await createVetVisit(selectedPet._id, selectedVet._id, visitData);
+            await createPastVetVisit(selectedPet._id, selectedVet._id, visitData);
             toast.success('Visit added successfully');
             fetchVetVisits();
         } catch (error) {
@@ -232,7 +232,7 @@ const MyVets = () => {
 
     const handleEditVisit = async (visitId, visitData) => {
         try {
-            await updateVetVisit(selectedPet._id, selectedVet._id, visitId, visitData);
+            await updatePastVisit(selectedPet._id, selectedVet._id, visitId, visitData);
             toast.success('Visit updated successfully');
             fetchVetVisits();
         } catch (error) {
@@ -244,11 +244,46 @@ const MyVets = () => {
     const handleDeleteVisit = async (visitId) => {
         if (window.confirm('Are you sure you want to delete this visit?')) {
             try {
-                await deleteVetVisit(selectedPet._id, selectedVet._id, visitId);
+                await deletePastVisit(selectedPet._id, selectedVet._id, visitId);
                 toast.success('Visit deleted successfully');
                 fetchVetVisits();
             } catch (error) {
                 toast.error('Failed to delete visit');
+                throw error;
+            }
+        }
+    };
+
+    const handleAddUpcomingVisit = async (visitData) => {
+        try {
+            await createUpcomingVisit(selectedPet._id, selectedVet._id, visitData);
+            toast.success('Appointment scheduled successfully');
+            fetchVetVisits();
+        } catch (error) {
+            toast.error('Failed to schedule appointment');
+            throw error;
+        }
+    };
+    
+    const handleEditUpcomingVisit = async (visitId, visitData) => {
+        try {
+            await updateUpcomingVisit(selectedPet._id, selectedVet._id, visitId, visitData);
+            toast.success('Appointment updated successfully');
+            fetchVetVisits();
+        } catch (error) {
+            toast.error('Failed to update appointment');
+            throw error;
+        }
+    };
+    
+    const handleDeleteUpcomingVisit = async (visitId) => {
+        if (window.confirm('Are you sure you want to cancel this appointment?')) {
+            try {
+                await deleteUpcomingVisit(selectedPet._id, selectedVet._id, visitId);
+                toast.success('Appointment cancelled successfully');
+                fetchVetVisits();
+            } catch (error) {
+                toast.error('Failed to cancel appointment');
                 throw error;
             }
         }
@@ -296,6 +331,9 @@ const MyVets = () => {
                                         onAddVisit={handleAddVisit}
                                         onEditVisit={handleEditVisit}
                                         onDeleteVisit={handleDeleteVisit}
+                                        onAddUpcomingVisit={handleAddUpcomingVisit}
+                                        onEditUpcomingVisit={handleEditUpcomingVisit}
+                                        onDeleteUpcomingVisit={handleDeleteUpcomingVisit}
                                     />
                                 ) : (
                                     <div className={styles.noVetSelected}>

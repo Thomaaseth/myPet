@@ -14,6 +14,9 @@ const VetDetailsLayout = ({
     onDeleteVisit,
     onAddVisit,
     onUploadDocument,
+    onAddUpcomingVisit,
+    onEditUpcomingVisit,
+    onDeleteUpcomingVisit,
 }) => {
   return (
     <div className={styles.vetDetails}>
@@ -33,6 +36,9 @@ const VetDetailsLayout = ({
           onEditVisit={onEditVisit}
           onDeleteVisit={onDeleteVisit}
           onUploadDocument={onUploadDocument}
+          onAddUpcomingVisit={onAddUpcomingVisit}
+          onEditUpcomingVisit={onEditUpcomingVisit}
+          onDeleteUpcomingVisit={onDeleteUpcomingVisit}
         />
       </div>
     </div>

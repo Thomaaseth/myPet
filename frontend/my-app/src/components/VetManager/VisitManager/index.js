@@ -1,12 +1,12 @@
 "use client"
 
 import React, { useState } from 'react';
-import { getVets, getPets, createVet, updateVet, deleteVet, getVetVisits, createVetVisit, updateVetVisit, deleteVetVisit } from '@/lib/api';
 import PastVisitsList from './PastVisits/pastVisitsList';
 import NextVisitCard from './UpcomingVisit/upcomingVisitCard';
 import PastVisitForm from './VetVisitForms/pastVisitForm';
 import EditPastVisitForm from './VetVisitForms/editPastVisitForm';
 import UpcomingVisitForm from './VetVisitForms/upcomingVisitForm';
+import UpcomingVisitCard from './UpcomingVisit/upcomingVisitCard';
 import styles from './VisitManager.module.css';
 
 const VisitManager = ({
@@ -14,11 +14,13 @@ const VisitManager = ({
   onAddVisit,
   onEditVisit,
   onDeleteVisit,
+  onAddUpcomingVisit,
   onUploadDocument
 }) => {
   const [activeTab, setActiveTab] = useState('past');
   const [isAddingPastVisit, setIsAddingPastVisit] = useState(false);
   const [isAddingUpcomingVisit, setIsAddingUpcomingVisit] = useState(false);
+  const [editingUpcomingVisit, setEditingUpcomingVisit] = useState(null);
   const [editingVisit, setEditingVisit] = useState(null);
   const [visitFormData, setVisitFormData] = useState({
     dateOfVisit: '',
@@ -75,14 +77,26 @@ const VisitManager = ({
   
     // Handle edit visit
     const handleEditVisit = (visit) => {
+      const formattedDate = new Date(visit.dateOfVisit).toISOString().split('T')[0];
       setEditingVisit(visit);
       setVisitFormData({
-        dateOfVisit: visit.dateOfVisit,
+        dateOfVisit: formattedDate,
         reason: visit.reason,
         notes: visit.notes,
         prescriptions: visit.prescriptions || [],
         documents: visit.documents || []
       });
+    };
+
+    const handleEditUpcomingVisit = (visit) => {
+      const formattedDate = new Date(visit.dateOfVisit).toISOString().split('T')[0];
+      setEditingUpcomingVisit(visit);
+      setUpcomingFormData({
+        dateOfVisit: formattedDate,
+        reason: visit.reason,
+        notes: visit.notes
+      });
+      setIsAddingUpcomingVisit(true);
     };
 
     return (
@@ -129,6 +143,7 @@ const VisitManager = ({
                 <UpcomingVisitCard
                   visit={upcomingVisit}
                   onCancel={() => onDeleteVisit(upcomingVisit._id)}
+                  onEdit={handleEditUpcomingVisit}
                 />
               ) : (
                 <button 
@@ -197,25 +212,35 @@ const VisitManager = ({
           />
         )}
   
-        {isAddingUpcomingVisit && (
+          {isAddingUpcomingVisit && (
           <UpcomingVisitForm
             visitData={upcomingFormData}
             onInputChange={handleUpcomingVisitChange}
             onSubmit={async (e) => {
               e.preventDefault();
               try {
-                await onAddVisit({ ...upcomingFormData, isUpcoming: true });
+                if (editingUpcomingVisit) {
+                  await onEditVisit(editingUpcomingVisit._id, {
+                    ...upcomingFormData,
+                    isUpcoming: true
+                  });
+                  setEditingUpcomingVisit(null);
+                } else {
+                  await onAddUpcomingVisit({ ...upcomingFormData, isUpcoming: true });
+                }
                 setIsAddingUpcomingVisit(false);
                 resetUpcomingVisitForm();
               } catch (error) {
-                console.error('Failed to add upcoming visit:', error);
+                console.error('Failed to handle upcoming visit:', error);
               }
             }}
             onCancel={() => {
               setIsAddingUpcomingVisit(false);
+              setEditingUpcomingVisit(null);
               resetUpcomingVisitForm();
             }}
             isOpen={isAddingUpcomingVisit}
+            isEditing={!!editingUpcomingVisit}
           />
         )}
       </div>

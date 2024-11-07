@@ -248,49 +248,61 @@ router.post('/pets/:petId/vets/:vetId/visits', isAuthenticated, upload.array('do
             return res.status(404).json({ message: 'Pet or vet not found' });
         }
 
-        const { dateOfVisit } = req.body;
+        const { dateOfVisit, isUpcoming } = req.body;
         if (!dateOfVisit) {
             return res.status(400).json({ message: 'Date of visit is required' });
         }
 
-        // Validate date is not in future
-        if (new Date(dateOfVisit) > new Date()) {
-            return res.status(400).json({ message: 'Visit date cannot be in the future' });
+        // Validate date based on visit type
+        const visitDate = new Date(dateOfVisit);
+        const now = new Date();
+        
+        if (isUpcoming && visitDate <= now) {
+            return res.status(400).json({ message: 'Upcoming visit date must be in the future' });
+        }
+        if (!isUpcoming && visitDate > now) {
+            return res.status(400).json({ message: 'Past visit date cannot be in the future' });
         }
 
-        // Handle document uploads - ensure documents is always an array
-        const documents = Array.isArray(req.files) ? req.files.map(file => ({
-            name: file.originalname,
-            url: file.path,
-            uploadDate: new Date(),
-            type: file.mimetype
-        })) : [];
+        // For upcoming visits, check if one already exists
+        if (isUpcoming) {
+            const existingUpcoming = await VetVisit.findOne({
+                pet: req.params.petId,
+                vet: req.params.vetId,
+                isUpcoming: true
+            });
+        
+            if (existingUpcoming) {
+                return res.status(400).json({ message: 'An upcoming visit already exists' });
+            }
+        }
+
+        // Handle document uploads - only for past visits
+        const documents = !isUpcoming && Array.isArray(req.files) ? 
+            req.files.map(file => ({
+                name: file.originalname,
+                url: file.path,
+                uploadDate: new Date(),
+                type: file.mimetype
+            })) : [];
 
         const visitData = {
             pet: req.params.petId,
             vet: req.params.vetId,
             dateOfVisit,
+            isUpcoming,
             documents,
-            // Optional fields
-            nextAppointment: req.body.nextAppointment || undefined,
             reason: req.body.reason || undefined,
             notes: req.body.notes || undefined,
-            prescriptions: req.body.prescriptions ? JSON.parse(req.body.prescriptions) : []
         };
 
         const visit = await VetVisit.create(visitData);
 
-        // Add visit to pet's vetVisits array
-        await Pet.findByIdAndUpdate(
-            req.params.petId,
-            { $push: { vetVisits: visit._id } }
-        );
-
-        // Add visit to vet's visits array
-        await Vet.findByIdAndUpdate(
-        req.params.vetId,
-        { $push: { visits: visit._id } }
-        );
+        // Add visit references
+        await Promise.all([
+            Pet.findByIdAndUpdate(req.params.petId, { $push: { vetVisits: visit._id } }),
+            Vet.findByIdAndUpdate(req.params.vetId, { $push: { visits: visit._id } })
+        ]);
 
         res.status(201).json({
             message: 'Visit added successfully',
