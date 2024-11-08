@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Vet = require('../models/Vet.model');
-const VetVisit = require('../models/VetVisit.model');
+const PastVisit = require('../models/PastVisit.model');
+const NextAppointment = require('../models/NextAppointment.model')
 const Pet = require('../models/Pet.model');
 const User = require('../models/User.model')
 const mongoose = require('mongoose');
@@ -153,7 +154,7 @@ router.delete('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
         });
 
         // Get all visits for this pet and vet
-        const visits = await VetVisit.find({
+        const visits = await PastVisit.find({
             pet: req.params.petId,
             vet: req.params.vetId
         });
@@ -173,7 +174,7 @@ router.delete('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
             });
 
             // Delete the visits themselves
-            await VetVisit.deleteMany({
+            await PastVisit.deleteMany({
                 _id: { $in: visitIds }
             });
         }
@@ -182,7 +183,7 @@ router.delete('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
         // If vet has no more pets, optionally delete the vet
         const vet = await Vet.findById(req.params.vetId);
         if (vet && vet.pets.length === 0) {
-            await VetVisit.deleteMany({ vet: req.params.vetId });
+            await PastVisit.deleteMany({ vet: req.params.vetId });
 
             await Vet.findByIdAndDelete(req.params.vetId);
         }
@@ -195,19 +196,18 @@ router.delete('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
     }
 });
 
-// VISIT ROUTES
+// VISITS ROUTES
 
-// Get all visits for a specific pet and vet
-router.get('/pets/:petId/vets/:vetId/visits', isAuthenticated, async (req, res) => {
+// Past Visits Routes
+router.get('/pets/:petId/vets/:vetId/past-visits', isAuthenticated, async (req, res) => {
     try {
-
         if (!mongoose.Types.ObjectId.isValid(req.params.petId)) {
             return res.status(404).json({ message: 'Invalid pet ID format' });
         }
         if (!mongoose.Types.ObjectId.isValid(req.params.vetId)) {
             return res.status(404).json({ message: 'Invalid vet ID format' });
         }
-        // Verify pet belongs to user and has this vet
+
         const pet = await Pet.findOne({
             _id: req.params.petId,
             user: req.user._id,
@@ -218,7 +218,7 @@ router.get('/pets/:petId/vets/:vetId/visits', isAuthenticated, async (req, res) 
             return res.status(404).json({ message: 'Pet or vet not found' });
         }
 
-        const visits = await VetVisit.find({ 
+        const visits = await PastVisit.find({ 
             pet: req.params.petId,
             vet: req.params.vetId 
         })
@@ -226,18 +226,16 @@ router.get('/pets/:petId/vets/:vetId/visits', isAuthenticated, async (req, res) 
         .sort({ dateOfVisit: -1 });
 
         res.status(200).json({
-            message: 'Visits retrieved successfully',
+            message: 'Past visits retrieved successfully',
             data: visits
         });
     } catch (error) {
-        res.status(400).json({ message: 'Error fetching visits', error: error.toString() });
+        res.status(400).json({ message: 'Error fetching past visits', error: error.toString() });
     }
 });
 
-// Add new visit
-router.post('/pets/:petId/vets/:vetId/visits', isAuthenticated, upload.array('documents'), async (req, res) => {
+router.post('/pets/:petId/vets/:vetId/past-visits', isAuthenticated, upload.array('documents'), async (req, res) => {
     try {
-        // Verify pet belongs to user and has this vet
         const pet = await Pet.findOne({
             _id: req.params.petId,
             user: req.user._id,
@@ -248,37 +246,13 @@ router.post('/pets/:petId/vets/:vetId/visits', isAuthenticated, upload.array('do
             return res.status(404).json({ message: 'Pet or vet not found' });
         }
 
-        const { dateOfVisit, isUpcoming } = req.body;
+        const { dateOfVisit } = req.body;
         if (!dateOfVisit) {
             return res.status(400).json({ message: 'Date of visit is required' });
         }
 
-        // Validate date based on visit type
-        const visitDate = new Date(dateOfVisit);
-        const now = new Date();
-        
-        if (isUpcoming && visitDate <= now) {
-            return res.status(400).json({ message: 'Upcoming visit date must be in the future' });
-        }
-        if (!isUpcoming && visitDate > now) {
-            return res.status(400).json({ message: 'Past visit date cannot be in the future' });
-        }
-
-        // For upcoming visits, check if one already exists
-        if (isUpcoming) {
-            const existingUpcoming = await VetVisit.findOne({
-                pet: req.params.petId,
-                vet: req.params.vetId,
-                isUpcoming: true
-            });
-        
-            if (existingUpcoming) {
-                return res.status(400).json({ message: 'An upcoming visit already exists' });
-            }
-        }
-
-        // Handle document uploads - only for past visits
-        const documents = !isUpcoming && Array.isArray(req.files) ? 
+        // Handle document uploads
+        const documents = Array.isArray(req.files) ? 
             req.files.map(file => ({
                 name: file.originalname,
                 url: file.path,
@@ -290,34 +264,33 @@ router.post('/pets/:petId/vets/:vetId/visits', isAuthenticated, upload.array('do
             pet: req.params.petId,
             vet: req.params.vetId,
             dateOfVisit,
-            isUpcoming,
             documents,
             reason: req.body.reason || undefined,
             notes: req.body.notes || undefined,
         };
 
-        const visit = await VetVisit.create(visitData);
+        const visit = await PastVisit.create(visitData);
 
         // Add visit references
         await Promise.all([
-            Pet.findByIdAndUpdate(req.params.petId, { $push: { vetVisits: visit._id } }),
-            Vet.findByIdAndUpdate(req.params.vetId, { $push: { visits: visit._id } })
+            Pet.findByIdAndUpdate(req.params.petId, { $push: { pastVisits: visit._id } }),
+            Vet.findByIdAndUpdate(req.params.vetId, { $push: { pastVisits: visit._id } })
         ]);
 
         res.status(201).json({
-            message: 'Visit added successfully',
+            message: 'Past visit added successfully',
             data: visit
         });
     } catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: error.message });
         }
-        res.status(500).json({ message: 'Error adding visit', error: error.toString() });
+        res.status(500).json({ message: 'Error adding past visit', error: error.toString() });
     }
 });
 
 // Update visit
-router.put('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, upload.array('documents'), async (req, res) => {
+router.put('/pets/:petId/vets/:vetId/past-visits/:visitId', isAuthenticated, upload.array('documents'), async (req, res) => {
     try {
         const pet = await Pet.findOne({
             _id: req.params.petId,
@@ -329,7 +302,7 @@ router.put('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, upload.a
             return res.status(404).json({ message: 'Pet or vet not found' });
         }
 
-        const visit = await VetVisit.findOne({
+        const visit = await PastVisit.findOne({
             _id: req.params.visitId,
             pet: req.params.petId,
             vet: req.params.vetId
@@ -339,7 +312,7 @@ router.put('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, upload.a
             return res.status(404).json({ message: 'Visit not found' });
         }
 
-        // Handle new documents if any - ensure documents is always an array
+        // Handle new documents
         const newDocuments = Array.isArray(req.files) ? req.files.map(file => ({
             name: file.originalname,
             url: file.path,
@@ -349,11 +322,9 @@ router.put('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, upload.a
 
         // Update fields
         const updates = {
-            ...(req.body.dateOfVisit && { dateOfVisit: req.body.dateOfVisit }),
-            ...(req.body.nextAppointment !== undefined && { nextAppointment: req.body.nextAppointment }),
-            ...(req.body.reason !== undefined && { reason: req.body.reason }),
-            ...(req.body.notes !== undefined && { notes: req.body.notes }),
-            ...(req.body.prescriptions && { prescriptions: JSON.parse(req.body.prescriptions) }),
+            dateOfVisit: req.body.dateOfVisit,
+            reason: req.body.reason,
+            notes: req.body.notes
         };
 
         if (newDocuments.length > 0) {
@@ -364,31 +335,20 @@ router.put('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, upload.a
         await visit.save();
 
         res.status(200).json({
-            message: 'Visit updated successfully',
+            message: 'Past visit updated successfully',
             data: visit
         });
     } catch (error) {
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: error.message });
         }
-        res.status(500).json({ message: 'Error updating visit', error: error.toString() });
+        res.status(500).json({ message: 'Error updating past visit', error: error.toString() });
     }
 });
 
 // Delete visit
-router.delete('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, async (req, res) => {
+router.delete('/pets/:petId/vets/:vetId/past-visits/:visitId', isAuthenticated, async (req, res) => {
     try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.petId)) {
-            return res.status(404).json({ message: 'Invalid pet ID format' });
-        }
-        if (!mongoose.Types.ObjectId.isValid(req.params.vetId)) {
-            return res.status(404).json({ message: 'Invalid vet ID format' });
-        }
-        if (!mongoose.Types.ObjectId.isValid(req.params.visitId)) {
-            return res.status(404).json({ message: 'Invalid visit ID format' });
-        }
-        
-        // Verify pet belongs to user and has this vet
         const pet = await Pet.findOne({
             _id: req.params.petId,
             user: req.user._id,
@@ -399,7 +359,7 @@ router.delete('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, async
             return res.status(404).json({ message: 'Pet or vet not found' });
         }
 
-        const visit = await VetVisit.findOne({
+        const visit = await PastVisit.findOne({
             _id: req.params.visitId,
             pet: req.params.petId,
             vet: req.params.vetId
@@ -409,60 +369,186 @@ router.delete('/pets/:petId/vets/:vetId/visits/:visitId', isAuthenticated, async
             return res.status(404).json({ message: 'Visit not found' });
         }
 
-        // Remove visit from pet's vetVisits array
-        await Pet.findByIdAndUpdate(
-            req.params.petId,
-            { $pull: { vetVisits: visit._id } }
-        );
+        // Remove references
+        await Promise.all([
+            Pet.findByIdAndUpdate(req.params.petId, 
+                { $pull: { pastVisits: visit._id } }
+            ),
+            Vet.findByIdAndUpdate(req.params.vetId, 
+                { $pull: { pastVisits: visit._id } }
+            )
+        ]);
 
-        // Remove visit from vet's visits array
-        await Vet.findByIdAndUpdate(
-        req.params.vetId,
-        { $pull: { visits: visit._id } }
-        );
-
-        await VetVisit.findByIdAndDelete(visit._id);
+        await PastVisit.findByIdAndDelete(visit._id);
 
         res.status(200).json({ 
-            message: 'Visit deleted successfully' 
+            message: 'Past visit deleted successfully' 
         });
     } catch (error) {
-        res.status(400).json({ message: 'Error deleting visit', error: error.toString() });
+        res.status(400).json({ message: 'Error deleting past visit', error: error.toString() });
     }
-});
+})
 
-// Get all visits for a specific vet
-router.get('/vets/:vetId/visits', isAuthenticated, async (req, res) => {
+// Next Appointment Routes
+router.get('/pets/:petId/vets/:vetId/next-appointment', isAuthenticated, async (req, res) => {
     try {
-        // Verify the vet is associated with one of the user's pets
         const pet = await Pet.findOne({
+            _id: req.params.petId,
             user: req.user._id,
             vets: req.params.vetId
         });
 
         if (!pet) {
-            return res.status(404).json({ message: 'Vet not found or not associated with your pets' });
+            return res.status(404).json({ message: 'Pet or vet not found' });
         }
 
-        const vet = await Vet.findById(req.params.vetId)
-            .populate({
-                path: 'visits',
-                populate: {
-                    path: 'pet',
-                    select: 'name species'
-                }
-            });
-
-        if (!vet) {
-            return res.status(404).json({ message: 'Vet not found' });
-        }
+        const appointment = await NextAppointment.findOne({ 
+            pet: req.params.petId,
+            vet: req.params.vetId 
+        }).populate('vet');
 
         res.status(200).json({
-            message: 'Vet visits retrieved successfully',
-            data: vet.visits || []
+            message: 'Next appointment retrieved successfully',
+            data: appointment
         });
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching vet visits', error: error.toString() });
+        res.status(400).json({ message: 'Error fetching next appointment', error: error.toString() });
+    }
+});
+
+router.post('/pets/:petId/vets/:vetId/next-appointment', isAuthenticated, async (req, res) => {
+    try {
+        const pet = await Pet.findOne({
+            _id: req.params.petId,
+            user: req.user._id,
+            vets: req.params.vetId
+        });
+
+        if (!pet) {
+            return res.status(404).json({ message: 'Pet or vet not found' });
+        }
+
+        // Check if an appointment already exists
+        const existingAppointment = await NextAppointment.findOne({
+            pet: req.params.petId,
+            vet: req.params.vetId
+        });
+
+        if (existingAppointment) {
+            return res.status(400).json({ message: 'A next appointment already exists' });
+        }
+
+        const appointmentData = {
+            pet: req.params.petId,
+            vet: req.params.vetId,
+            dateScheduled: req.body.dateScheduled,
+            reason: req.body.reason,
+            notes: req.body.notes
+        };
+
+        const appointment = await NextAppointment.create(appointmentData);
+
+        // Add appointment references
+        await Promise.all([
+            Pet.findByIdAndUpdate(req.params.petId, { nextAppointment: appointment._id }),
+            Vet.findByIdAndUpdate(req.params.vetId, { $push: { appointments: appointment._id } })
+        ]);
+
+        res.status(201).json({
+            message: 'Next appointment scheduled successfully',
+            data: appointment
+        });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Error scheduling appointment', error: error.toString() });
+    }
+});
+
+router.put('/pets/:petId/vets/:vetId/next-appointment/:appointmentId', isAuthenticated, async (req, res) => {
+    try {
+        const pet = await Pet.findOne({
+            _id: req.params.petId,
+            user: req.user._id,
+            vets: req.params.vetId
+        });
+
+        if (!pet) {
+            return res.status(404).json({ message: 'Pet or vet not found' });
+        }
+
+        const appointment = await NextAppointment.findOne({
+            _id: req.params.appointmentId,
+            pet: req.params.petId,
+            vet: req.params.vetId
+        });
+
+        if (!appointment) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        // Update fields
+        const updates = {
+            dateScheduled: req.body.dateScheduled,
+            reason: req.body.reason,
+            notes: req.body.notes
+        };
+
+        Object.assign(appointment, updates);
+        await appointment.save();
+
+        res.status(200).json({
+            message: 'Next appointment updated successfully',
+            data: appointment
+        });
+    } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Error updating next appointment', error: error.toString() });
+    }
+});
+
+router.delete('/pets/:petId/vets/:vetId/next-appointment/:appointmentId', isAuthenticated, async (req, res) => {
+    try {
+        const pet = await Pet.findOne({
+            _id: req.params.petId,
+            user: req.user._id,
+            vets: req.params.vetId
+        });
+
+        if (!pet) {
+            return res.status(404).json({ message: 'Pet or vet not found' });
+        }
+
+        const appointment = await NextAppointment.findOne({
+            _id: req.params.appointmentId,
+            pet: req.params.petId,
+            vet: req.params.vetId
+        });
+
+        if (!appointment) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+
+        // Remove references
+        await Promise.all([
+            Pet.findByIdAndUpdate(req.params.petId, 
+                { $unset: { nextAppointment: "" } }
+            ),
+            Vet.findByIdAndUpdate(req.params.vetId, 
+                { $pull: { appointments: appointment._id } }
+            )
+        ]);
+
+        await NextAppointment.findByIdAndDelete(appointment._id);
+
+        res.status(200).json({ 
+            message: 'Next appointment cancelled successfully' 
+        });
+    } catch (error) {
+        res.status(400).json({ message: 'Error cancelling appointment', error: error.toString() });
     }
 });
 

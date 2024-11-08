@@ -2,7 +2,7 @@ import React from 'react';
 import styles from './VetVisitForms.module.css';
 
 const UpcomingVisitForm = ({
-  visitData,
+  appointmentData,
   onInputChange,
   onSubmit,
   onCancel,
@@ -14,18 +14,18 @@ const UpcomingVisitForm = ({
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
-          <h2>Schedule Next Visit</h2>
+          <h2>Schedule Next Appointment</h2>
           <p>Enter the appointment details below</p>
         </div>
 
         <form onSubmit={onSubmit} className={styles.visitForm}>
           <div className={styles.formGroup}>
-            <label htmlFor="dateOfVisit">Date of Visit</label>
+            <label htmlFor="dateScheduled">Next Appointment Date</label>
             <input
               type="date"
-              id="dateOfVisit"
-              name="dateOfVisit"
-              value={visitData.dateOfVisit}
+              id="dateScheduled"
+              name="dateScheduled"
+              value={appointmentData.dateScheduled}
               onChange={onInputChange}
               required
             />
@@ -37,7 +37,7 @@ const UpcomingVisitForm = ({
               type="text"
               id="reason"
               name="reason"
-              value={visitData.reason}
+              value={appointmentData.reason}
               onChange={onInputChange}
             />
           </div>
@@ -47,7 +47,7 @@ const UpcomingVisitForm = ({
             <textarea
               id="notes"
               name="notes"
-              value={visitData.notes}
+              value={appointmentData.notes}
               onChange={onInputChange}
               rows="4"
             />
@@ -59,7 +59,7 @@ const UpcomingVisitForm = ({
             Cancel
           </button>
           <button onClick={onSubmit} className={styles.submitButton}>
-            Schedule Visit
+            Schedule Appointment
           </button>
         </div>
       </div>

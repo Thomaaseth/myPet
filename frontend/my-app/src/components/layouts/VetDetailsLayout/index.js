@@ -7,16 +7,17 @@ import styles from './VetDetailsLayout.module.css'
 
 const VetDetailsLayout = ({
     vet,
-    visits,
+    pastVisits,
+    nextAppointment,
     onEdit,
     onDelete,
-    onEditVisit,
-    onDeleteVisit,
-    onAddVisit,
+    onAddPastVisit,
+    onEditPastVisit,
+    onDeletePastVisit,
+    onAddNextAppointment,
+    onEditNextAppointment,
+    onDeleteNextAppointment,
     onUploadDocument,
-    onAddUpcomingVisit,
-    onEditUpcomingVisit,
-    onDeleteUpcomingVisit,
 }) => {
   return (
     <div className={styles.vetDetails}>
@@ -31,14 +32,15 @@ const VetDetailsLayout = ({
       <div className={styles.vetContent}>
         <VetProfile vet={vet} />
         <VisitManager
-          visits={visits}
-          onAddVisit={onAddVisit}
-          onEditVisit={onEditVisit}
-          onDeleteVisit={onDeleteVisit}
+          pastVisits={pastVisits}
+          nextAppointment={nextAppointment}
+          onAddPastVisit={onAddPastVisit}
+          onEditPastVisit={onEditPastVisit}
+          onDeletePastVisit={onDeletePastVisit}
+          onAddNextAppointment={onAddNextAppointment}
+          onEditNextAppointment={onEditNextAppointment}
+          onDeleteNextAppointment={onDeleteNextAppointment}
           onUploadDocument={onUploadDocument}
-          onAddUpcomingVisit={onAddUpcomingVisit}
-          onEditUpcomingVisit={onEditUpcomingVisit}
-          onDeleteUpcomingVisit={onDeleteUpcomingVisit}
         />
       </div>
     </div>

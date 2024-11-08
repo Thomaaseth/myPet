@@ -10,18 +10,21 @@ import UpcomingVisitCard from './UpcomingVisit/upcomingVisitCard';
 import styles from './VisitManager.module.css';
 
 const VisitManager = ({
-  visits,
-  onAddVisit,
-  onEditVisit,
-  onDeleteVisit,
-  onAddUpcomingVisit,
-  onUploadDocument
+  pastVisits,          
+  nextAppointment,
+  onAddPastVisit,
+  onEditPastVisit,
+  onDeletePastVisit,
+  onAddNextAppointment,
+  onEditNextAppointment,
+  onDeleteNextAppointment,
+  onUploadDocument,
 }) => {
   const [activeTab, setActiveTab] = useState('past');
   const [isAddingPastVisit, setIsAddingPastVisit] = useState(false);
-  const [isAddingUpcomingVisit, setIsAddingUpcomingVisit] = useState(false);
-  const [editingUpcomingVisit, setEditingUpcomingVisit] = useState(null);
-  const [editingVisit, setEditingVisit] = useState(null);
+  const [isAddingNextAppointment, setIsAddingNextAppointment] = useState(false);
+  const [editingNextAppointment, setEditingNextAppointment] = useState(null);
+  const [editingPastVisit, setEditingPastVisit] = useState(null);
   const [visitFormData, setVisitFormData] = useState({
     dateOfVisit: '',
     reason: '',
@@ -29,14 +32,11 @@ const VisitManager = ({
     documents: []
   });
 
-  const [upcomingFormData, setUpcomingFormData] = useState({
-    dateOfVisit: '',
+  const [appointmentFormData, setAppointmentFormData] = useState({
+    dateScheduled: '',
     reason: '',
     notes: ''
   });  
-
-  const pastVisits = visits.filter(visit => !visit.isUpcoming);
-  const upcomingVisit = visits.find(visit => visit.isUpcoming);
 
     // Handler for past visit form changes
     const handlePastVisitChange = (e) => {
@@ -48,9 +48,9 @@ const VisitManager = ({
     };
   
     // Handler for upcoming visit form changes
-    const handleUpcomingVisitChange = (e) => {
+    const handleAppointmentChange  = (e) => {
       const { name, value } = e.target;
-      setUpcomingFormData(prev => ({
+      setAppointmentFormData(prev => ({
         ...prev,
         [name]: value
       }));
@@ -67,36 +67,35 @@ const VisitManager = ({
       });
     };
   
-    const resetUpcomingVisitForm = () => {
-      setUpcomingFormData({
-        dateOfVisit: '',
+    const resetAppointmentForm = () => {
+      setAppointmentFormData({
+        dateScheduled: '',
         reason: '',
         notes: ''
       });
     };
   
-    // Handle edit visit
-    const handleEditVisit = (visit) => {
+  // Handle edit functions
+  const handleEditPastVisit  = (visit) => {
       const formattedDate = new Date(visit.dateOfVisit).toISOString().split('T')[0];
-      setEditingVisit(visit);
+      setEditingPastVisit(visit);
       setVisitFormData({
         dateOfVisit: formattedDate,
         reason: visit.reason,
         notes: visit.notes,
-        prescriptions: visit.prescriptions || [],
         documents: visit.documents || []
       });
     };
 
-    const handleEditUpcomingVisit = (visit) => {
-      const formattedDate = new Date(visit.dateOfVisit).toISOString().split('T')[0];
-      setEditingUpcomingVisit(visit);
-      setUpcomingFormData({
-        dateOfVisit: formattedDate,
-        reason: visit.reason,
-        notes: visit.notes
+    const handleEditNextAppointment = (appointment) => {
+      const formattedDate = new Date(appointment.dateScheduled).toISOString().split('T')[0];
+      setEditingNextAppointment(appointment);
+      setAppointmentFormData({
+        dateScheduled: formattedDate,
+        reason: appointment.reason,
+        notes: appointment.notes
       });
-      setIsAddingUpcomingVisit(true);
+      setIsAddingNextAppointment(true);
     };
 
     return (
@@ -115,7 +114,7 @@ const VisitManager = ({
             Next Appointment
           </button>
         </div>
-  
+    
         <div className={styles.content}>
           {activeTab === 'past' ? (
             <>
@@ -132,24 +131,24 @@ const VisitManager = ({
                 </button>
               </div>
               <PastVisitsList
-                visits={pastVisits}
-                onEditVisit={handleEditVisit}
-                onDeleteVisit={onDeleteVisit}
+                pastVisits={pastVisits}
+                onEditVisit={handleEditPastVisit}
+                onDeleteVisit={onDeletePastVisit}
               />
             </>
           ) : (
             <div className={styles.upcomingVisitSection}>
-              {upcomingVisit ? (
+              {nextAppointment ? (
                 <UpcomingVisitCard
-                  visit={upcomingVisit}
-                  onCancel={() => onDeleteVisit(upcomingVisit._id)}
-                  onEdit={handleEditUpcomingVisit}
+                  appointment={nextAppointment}
+                  onCancel={() => onDeleteNextAppointment(nextAppointment._id)}
+                  onEdit={handleEditNextAppointment}
                 />
               ) : (
                 <button 
                   onClick={() => {
-                    resetUpcomingVisitForm();
-                    setIsAddingUpcomingVisit(true);
+                    resetAppointmentForm();
+                    setIsAddingNextAppointment(true);
                   }}
                   className={styles.scheduleButton}
                 >
@@ -159,7 +158,7 @@ const VisitManager = ({
             </div>
           )}
         </div>
-  
+    
         {isAddingPastVisit && (
           <PastVisitForm
             visitData={visitFormData}
@@ -167,11 +166,13 @@ const VisitManager = ({
             onSubmit={async (e) => {
               e.preventDefault();
               try {
-                await onAddVisit({ ...visitFormData, isUpcoming: false });
-                // Handle document uploads if needed
-                if (visitFormData.documents?.length > 0) {
-                  await onUploadDocument(visitFormData.documents);
+                const formattedDate = new Date(visitFormData.dateOfVisit);
+                // Check if date is in the past
+                if (formattedDate > new Date()) {
+                  throw new Error('Past visit date cannot be in the future');
                 }
+                
+                await onAddPastVisit(visitFormData);
                 setIsAddingPastVisit(false);
                 resetPastVisitForm();
               } catch (error) {
@@ -185,66 +186,65 @@ const VisitManager = ({
             isOpen={isAddingPastVisit}
           />
         )}
-  
-        {editingVisit && (
+    
+        {editingPastVisit && (
           <EditPastVisitForm
             visitData={visitFormData}
             onInputChange={handlePastVisitChange}
             onSubmit={async (e) => {
               e.preventDefault();
               try {
-                await onEditVisit(editingVisit._id, visitFormData);
-                // Handle document uploads if needed
-                if (visitFormData.documents?.length > 0) {
-                  await onUploadDocument(visitFormData.documents);
-                }
-                setEditingVisit(null);
+                await onEditPastVisit(editingPastVisit._id, visitFormData);
+                setEditingPastVisit(null);
                 resetPastVisitForm();
               } catch (error) {
                 console.error('Failed to edit visit:', error);
               }
             }}
             onCancel={() => {
-              setEditingVisit(null);
+              setEditingPastVisit(null);
               resetPastVisitForm();
             }}
-            isOpen={!!editingVisit}
+            isOpen={!!editingPastVisit}
           />
         )}
-  
-          {isAddingUpcomingVisit && (
+    
+        {isAddingNextAppointment && (
           <UpcomingVisitForm
-            visitData={upcomingFormData}
-            onInputChange={handleUpcomingVisitChange}
+          appointmentData={appointmentFormData}
+            onInputChange={handleAppointmentChange}
             onSubmit={async (e) => {
               e.preventDefault();
               try {
-                if (editingUpcomingVisit) {
-                  await onEditVisit(editingUpcomingVisit._id, {
-                    ...upcomingFormData,
-                    isUpcoming: true
-                  });
-                  setEditingUpcomingVisit(null);
-                } else {
-                  await onAddUpcomingVisit({ ...upcomingFormData, isUpcoming: true });
+                const formattedDate = new Date(appointmentFormData.dateScheduled);
+                // Check if date is in the future
+                if (formattedDate <= new Date()) {
+                  throw new Error('Next appointment date must be in the future');
                 }
-                setIsAddingUpcomingVisit(false);
-                resetUpcomingVisitForm();
+    
+                if (editingNextAppointment) {
+                  await onEditNextAppointment(editingNextAppointment._id, appointmentFormData);
+                  setEditingNextAppointment(null);
+                } else {
+                  await onAddNextAppointment(appointmentFormData);
+                }
+                setIsAddingNextAppointment(false);
+                resetAppointmentForm();
               } catch (error) {
-                console.error('Failed to handle upcoming visit:', error);
+                console.error('Failed to handle appointment:', error);
               }
             }}
             onCancel={() => {
-              setIsAddingUpcomingVisit(false);
-              setEditingUpcomingVisit(null);
-              resetUpcomingVisitForm();
+              setIsAddingNextAppointment(false);
+              setEditingNextAppointment(null);
+              resetAppointmentForm();
             }}
-            isOpen={isAddingUpcomingVisit}
-            isEditing={!!editingUpcomingVisit}
+            isOpen={isAddingNextAppointment}
+            isEditing={!!editingNextAppointment}
           />
         )}
       </div>
     );
-  };
+};
 
 export default VisitManager;

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getVets, getPets, createVet, updateVet, deleteVet, getVetVisits, createPastVetVisit, updatePastVisit, deletePastVisit, createUpcomingVisit, updateUpcomingVisit, deleteUpcomingVisit  } from '@/lib/api';
+import { getVets, getPets, createVet, updateVet, deleteVet, getVetPastVisits, getNextAppointment, createPastVisit, updatePastVisit, deletePastVisit, scheduleNextAppointment, updateNextAppointment, cancelNextAppointment  } from '@/lib/api';
 import { toast } from 'react-toastify';
 import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
@@ -26,6 +26,8 @@ const MyVets = () => {
     const [isAddingVet, setIsAddingVet] = useState(false);
     const [selectedVet, setSelectedVet] = useState(null);
     const [visits, setVisits] = useState([]);
+    const [pastVisits, setPastVisits] = useState([]);
+    const [nextAppointment, setNextAppointment] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [formData, setFormData] = useState({
         clinicName: '',
@@ -111,9 +113,20 @@ const MyVets = () => {
     const fetchVetVisits = async () => {
         if (!selectedVet) return;
         try {
-            const response = await getVetVisits(selectedPet._id, selectedVet._id);
-            setVisits(response.data);
+            // Fetch both types of visits in parallel
+            const [pastVisitsResponse, nextAppointmentResponse] = await Promise.all([
+                getVetPastVisits(selectedPet._id, selectedVet._id),
+                getNextAppointment(selectedPet._id, selectedVet._id)
+            ]);
+    
+            // Set past visits
+            setPastVisits(pastVisitsResponse.data || []);
+            
+            // Set next appointment if exists
+            setNextAppointment(nextAppointmentResponse.data || null);
+    
         } catch (error) {
+            console.error('Error fetching visits:', error);
             toast.error('Failed to fetch visits');
         }
     };
@@ -221,7 +234,7 @@ const MyVets = () => {
 
     const handleAddVisit = async (visitData) => {
         try {
-            await createPastVetVisit(selectedPet._id, selectedVet._id, visitData);
+            await createPastVisit(selectedPet._id, selectedVet._id, visitData);
             toast.success('Visit added successfully');
             fetchVetVisits();
         } catch (error) {
@@ -229,7 +242,7 @@ const MyVets = () => {
             throw error;
         }
     };
-
+    
     const handleEditVisit = async (visitId, visitData) => {
         try {
             await updatePastVisit(selectedPet._id, selectedVet._id, visitId, visitData);
@@ -240,7 +253,7 @@ const MyVets = () => {
             throw error;
         }
     };
-
+    
     const handleDeleteVisit = async (visitId) => {
         if (window.confirm('Are you sure you want to delete this visit?')) {
             try {
@@ -253,10 +266,10 @@ const MyVets = () => {
             }
         }
     };
-
+    
     const handleAddUpcomingVisit = async (visitData) => {
         try {
-            await createUpcomingVisit(selectedPet._id, selectedVet._id, visitData);
+            await scheduleNextAppointment(selectedPet._id, selectedVet._id, visitData);
             toast.success('Appointment scheduled successfully');
             fetchVetVisits();
         } catch (error) {
@@ -267,7 +280,7 @@ const MyVets = () => {
     
     const handleEditUpcomingVisit = async (visitId, visitData) => {
         try {
-            await updateUpcomingVisit(selectedPet._id, selectedVet._id, visitId, visitData);
+            await updateNextAppointment(selectedPet._id, selectedVet._id, visitId, visitData);
             toast.success('Appointment updated successfully');
             fetchVetVisits();
         } catch (error) {
@@ -279,7 +292,7 @@ const MyVets = () => {
     const handleDeleteUpcomingVisit = async (visitId) => {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
             try {
-                await deleteUpcomingVisit(selectedPet._id, selectedVet._id, visitId);
+                await cancelNextAppointment(selectedPet._id, selectedVet._id, visitId);
                 toast.success('Appointment cancelled successfully');
                 fetchVetVisits();
             } catch (error) {
@@ -325,15 +338,16 @@ const MyVets = () => {
                                 ) : selectedVet ? (
                                     <VetDetailsLayout
                                         vet={selectedVet}
-                                        visits={visits}
+                                        pastVisits={pastVisits}
+                                        nextAppointment={nextAppointment}
                                         onEdit={() => setEditingVet(selectedVet)}
                                         onDelete={() => handleDeleteVet(selectedVet._id)}
-                                        onAddVisit={handleAddVisit}
-                                        onEditVisit={handleEditVisit}
-                                        onDeleteVisit={handleDeleteVisit}
-                                        onAddUpcomingVisit={handleAddUpcomingVisit}
-                                        onEditUpcomingVisit={handleEditUpcomingVisit}
-                                        onDeleteUpcomingVisit={handleDeleteUpcomingVisit}
+                                        onAddPastVisit={handleAddVisit}
+                                        onEditPastVisit={handleEditVisit}
+                                        onDeletePastVisit={handleDeleteVisit}
+                                        onAddNextAppointment={handleAddUpcomingVisit}
+                                        onEditNextAppointment={handleEditUpcomingVisit}
+                                        onDeleteNextAppointment={handleDeleteUpcomingVisit}
                                     />
                                 ) : (
                                     <div className={styles.noVetSelected}>

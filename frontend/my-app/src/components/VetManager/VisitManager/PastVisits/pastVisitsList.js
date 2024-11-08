@@ -1,10 +1,15 @@
 import React from 'react';
 import styles from './PastVisits.module.css';
 
-const PastVisitsList = ({ visits, onEditVisit, onDeleteVisit }) => {
-    return (
+const PastVisitsList = ({ pastVisits, onEditVisit, onDeleteVisit }) => {
+
+  if (!pastVisits || !Array.isArray(pastVisits)) {
+    return <div>No past visits found</div>;
+  }
+
+  return (
       <div className={styles.visitLog}>
-        {visits.sort((a, b) => new Date(b.dateOfVisit) - new Date(a.dateOfVisit)).map(visit => (
+        {pastVisits.sort((a, b) => new Date(b.dateOfVisit) - new Date(a.dateOfVisit)).map(visit => (
           <div key={visit._id} className={styles.logEntry}>
             <div className={styles.logHeader}>
               <div className={styles.logDate}>

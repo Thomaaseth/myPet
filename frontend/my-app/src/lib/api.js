@@ -103,10 +103,21 @@ export const getPets = async () => {
                     const vetsWithVisits = await Promise.all(
                         vetsResponse.data.map(async (vet) => {
                             try {
-                                const visitsResponse = await getVetVisits(pet._id, vet._id);
+                                // Get both past visits and next appointment
+                                const [pastVisitsResponse, nextAppointmentResponse] = await Promise.all([
+                                    getVetPastVisits(pet._id, vet._id),
+                                    getNextAppointment(pet._id, vet._id)
+                                ]);
+
+                                // Combine them into a single visits array
+                                const allVisits = [
+                                    ...(pastVisitsResponse.data || []),
+                                    ...(nextAppointmentResponse.data ? [nextAppointmentResponse.data] : [])
+                                ];
+
                                 return {
                                     ...vet,
-                                    visits: visitsResponse.data || []
+                                    visits: allVisits
                                 };
                             } catch (error) {
                                 console.error(`Error fetching visits for vet ${vet._id}:`, error);
@@ -294,42 +305,45 @@ export const deleteVet = async (petId, vetId) => {
 
 // Vet visit operations
 
-export const getVetVisits = async (petId, vetId) => {
+// Get operations
+export const getVetPastVisits = async (petId, vetId) => {
     try {
-        const response = await api.get(`/api/pets/${petId}/vets/${vetId}/visits`);
-        // Sort visits into past and upcoming based on date
-        const visits = response.data.data || [];
-        return {
-            ...response,
-            data: visits.map(visit => ({
-                ...visit,
-                isUpcoming: new Date(visit.dateOfVisit) > new Date()
-            }))
-        };
+        const response = await api.get(`/api/pets/${petId}/vets/${vetId}/past-visits`);
+        return response.data;
     } catch (error) {
-        console.error('Error fetching vet visits:', error.response || error);
+        console.error('Error fetching past visits:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
 
-export const createPastVetVisit = async (petId, vetId, visitData) => {
+export const getNextAppointment = async (petId, vetId) => {
+    try {
+        const response = await api.get(`/api/pets/${petId}/vets/${vetId}/next-appointment`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching next appointment:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+// Past Visits operations
+export const createPastVisit = async (petId, vetId, visitData) => {
     try {
         const formData = new FormData();
         
-        if (visitData.documents) {
+        if (visitData.documents && visitData.documents.length > 0) {
             visitData.documents.forEach(file => {
                 formData.append('documents', file);
             });
-            delete visitData.documents;
         }
 
-        formData.append('dateOfVisit', visitData.dateOfVisit);
+        const dateOfVisit = new Date(visitData.dateOfVisit).toISOString();
+        formData.append('dateOfVisit', dateOfVisit);
         formData.append('reason', visitData.reason || '');
         formData.append('notes', visitData.notes || '');
-        formData.append('isUpcoming', false);
 
         const response = await api.post(
-            `/api/pets/${petId}/vets/${vetId}/visits`, 
+            `/api/pets/${petId}/vets/${vetId}/past-visits`, 
             formData,
             {
                 headers: {
@@ -339,11 +353,10 @@ export const createPastVetVisit = async (petId, vetId, visitData) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error creating vet visit:', error.response || error);
+        console.error('Error creating past visit:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
-
 
 export const updatePastVisit = async (petId, vetId, visitId, visitData) => {
     try {
@@ -360,10 +373,9 @@ export const updatePastVisit = async (petId, vetId, visitId, visitData) => {
         formData.append('dateOfVisit', visitData.dateOfVisit);
         formData.append('reason', visitData.reason || '');
         formData.append('notes', visitData.notes || '');
-        formData.append('isUpcoming', false);
 
         const response = await api.put(
-            `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`, 
+            `/api/pets/${petId}/vets/${vetId}/past-visits/${visitId}`, 
             formData,
             {
                 headers: {
@@ -381,7 +393,7 @@ export const updatePastVisit = async (petId, vetId, visitId, visitData) => {
 export const deletePastVisit = async (petId, vetId, visitId) => {
     try {
         const response = await api.delete(
-            `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`
+            `/api/pets/${petId}/vets/${vetId}/past-visits/${visitId}`
         );
         return response.data;
     } catch (error) {
@@ -390,15 +402,17 @@ export const deletePastVisit = async (petId, vetId, visitId) => {
     }
 };
 
-export const createUpcomingVisit = async (petId, vetId, visitData) => {
+// Next Appointment operations
+export const scheduleNextAppointment = async (petId, vetId, appointmentData) => {
     try {
+        const dateScheduled = new Date(appointmentData.dateScheduled).toISOString();
+        
         const response = await api.post(
-            `/api/pets/${petId}/vets/${vetId}/visits`,
+            `/api/pets/${petId}/vets/${vetId}/next-appointment`,
             {
-                dateOfVisit: visitData.dateOfVisit,
-                reason: visitData.reason || '',
-                notes: visitData.notes || '',
-                isUpcoming: true
+                dateScheduled,
+                reason: appointmentData.reason || '',
+                notes: appointmentData.notes || ''
             },
             {
                 headers: {
@@ -408,20 +422,19 @@ export const createUpcomingVisit = async (petId, vetId, visitData) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error creating upcoming visit:', error.response || error);
+        console.error('Error scheduling next appointment:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
 
-export const updateUpcomingVisit = async (petId, vetId, visitId, visitData) => {
+export const updateNextAppointment = async (petId, vetId, appointmentId, appointmentData) => {
     try {
         const response = await api.put(
-            `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`,
+            `/api/pets/${petId}/vets/${vetId}/next-appointment/${appointmentId}`,
             {
-                dateOfVisit: visitData.dateOfVisit,
-                reason: visitData.reason || '',
-                notes: visitData.notes || '',
-                isUpcoming: true
+                dateScheduled: appointmentData.dateScheduled,
+                reason: appointmentData.reason || '',
+                notes: appointmentData.notes || ''
             },
             {
                 headers: {
@@ -431,19 +444,19 @@ export const updateUpcomingVisit = async (petId, vetId, visitId, visitData) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error updating upcoming visit:', error.response || error);
+        console.error('Error updating next appointment:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
 
-export const deleteUpcomingVisit = async (petId, vetId, visitId) => {
+export const cancelNextAppointment = async (petId, vetId, appointmentId) => {
     try {
         const response = await api.delete(
-            `/api/pets/${petId}/vets/${vetId}/visits/${visitId}`
+            `/api/pets/${petId}/vets/${vetId}/next-appointment/${appointmentId}`
         );
         return response.data;
     } catch (error) {
-        console.error('Error deleting upcoming visit:', error.response || error);
+        console.error('Error cancelling next appointment:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };

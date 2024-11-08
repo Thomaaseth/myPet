@@ -133,10 +133,15 @@ const petSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Vet'
     }],
-    vetVisits: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'VetVisit'
+    pastVisits: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'PastVisit' 
+    }],
+    nextAppointments: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'NextAppointment' 
     }]
+
 }, {timestamps: true});
 
 petSchema.virtual('age').get(function() {

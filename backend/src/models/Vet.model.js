@@ -32,9 +32,13 @@ const vetSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pet'
     }],
-    visits: [{ 
+    pastVisits: [{ 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'VetVisit' 
+        ref: 'PastVisit' 
+    }],
+    nextAppointments: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'NextAppointment' 
     }]
 }, { timestamps: true });
 

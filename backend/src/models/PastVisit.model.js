@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const vetVisitSchema = new mongoose.Schema({
+const pastVisitSchema = new mongoose.Schema({
     pet: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pet',
@@ -16,20 +16,10 @@ const vetVisitSchema = new mongoose.Schema({
         required: true,
         validate: {
             validator: function(date) {
-                if (this.isUpcoming) {
-                    return date > new Date();  // Must be in future for upcoming visits
-                }
-                return date <= new Date();     // Must be in past for past visits
+                return date <= new Date();
             },
-            message: props => props.value <= new Date() ? 
-                'Upcoming visit date must be in the future' : 
-                'Past visit date cannot be in the future'
+            message: 'Visit date cannot be in the future'
         }
-    },
-    isUpcoming: {
-        type: Boolean,
-        required: true,
-        default: false
     },
     reason: String,
     notes: String,
@@ -41,8 +31,8 @@ const vetVisitSchema = new mongoose.Schema({
             default: Date.now
         },
         type: { type: String }
-    }]
+    }],
 }, { timestamps: true });
 
-const VetVisit = mongoose.model('VetVisit', vetVisitSchema);
-module.exports = VetVisit;
+const PastVisit = mongoose.model('PastVisit', pastVisitSchema);
+module.exports = PastVisit;
