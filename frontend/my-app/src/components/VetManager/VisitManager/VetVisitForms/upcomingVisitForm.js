@@ -6,7 +6,8 @@ const UpcomingVisitForm = ({
   onInputChange,
   onSubmit,
   onCancel,
-  isOpen
+  isOpen,
+  isEditing = false,
 }) => {
   if (!isOpen) return null;
 
@@ -14,8 +15,7 @@ const UpcomingVisitForm = ({
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
-          <h2>Schedule Next Appointment</h2>
-          <p>Enter the appointment details below</p>
+        <h2>{isEditing ? 'Edit next appointment' : 'Schedule new appointment'}</h2>
         </div>
 
         <form onSubmit={onSubmit} className={styles.visitForm}>
@@ -59,7 +59,7 @@ const UpcomingVisitForm = ({
             Cancel
           </button>
           <button onClick={onSubmit} className={styles.submitButton}>
-            Schedule Appointment
+          {isEditing ? 'Save Changes' : 'Add appointment'}
           </button>
         </div>
       </div>

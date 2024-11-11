@@ -7,7 +7,8 @@ const PastVisitForm = ({
   onSubmit,
   onCancel,
   isOpen,
-  onDocumentUpload
+  onDocumentUpload,
+  isEditing = Fasle
 }) => {
   if (!isOpen) return null;
 
@@ -37,9 +38,8 @@ const PastVisitForm = ({
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <div className={styles.modalHeader}>
-          <h2>Add New Visit</h2>
-          <p>Enter the visit details below</p>
-        </div>
+        <h2>{isEditing ? 'Edit Visit' : 'Add New Visit'}</h2>
+      </div>
 
         <form onSubmit={onSubmit} className={styles.visitForm}>
           <div className={styles.formGroup}>
@@ -109,7 +109,7 @@ const PastVisitForm = ({
             Cancel
           </button>
           <button onClick={onSubmit} className={styles.submitButton}>
-            Add Visit
+          {isEditing ? 'Save Changes' : 'Add Visit'}
           </button>
         </div>
       </div>

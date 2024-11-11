@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import PastVisitsList from './PastVisits/pastVisitsList';
 import NextVisitCard from './UpcomingVisit/upcomingVisitCard';
 import PastVisitForm from './VetVisitForms/pastVisitForm';
-import EditPastVisitForm from './VetVisitForms/editPastVisitForm';
 import UpcomingVisitForm from './VetVisitForms/upcomingVisitForm';
 import UpcomingVisitCard from './UpcomingVisit/upcomingVisitCard';
 import styles from './VisitManager.module.css';
@@ -184,11 +183,12 @@ const VisitManager = ({
               resetPastVisitForm();
             }}
             isOpen={isAddingPastVisit}
-          />
+            isEditing={false}
+            />
         )}
     
         {editingPastVisit && (
-          <EditPastVisitForm
+          <PastVisitForm
             visitData={visitFormData}
             onInputChange={handlePastVisitChange}
             onSubmit={async (e) => {
@@ -206,6 +206,7 @@ const VisitManager = ({
               resetPastVisitForm();
             }}
             isOpen={!!editingPastVisit}
+            isEditing={true}
           />
         )}
     

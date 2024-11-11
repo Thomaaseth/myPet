@@ -5,7 +5,6 @@ import { getPets, createPet, updatePet, deletePet, getSpeciesList } from '../../
 import PetDetailsLayout from '@/components/layouts/PetDetailsLayout';
 import PetTabs from "@/components/PetManager/PetTabs";
 import AddPetForm from "@/components/PetManager/PetForms/addPetForm";
-import EditPetForm from "@/components/PetManager/PetForms/editPetForm";
 import { toast } from "react-toastify";
 import styles from './Pets.module.css'
 import { TOAST_MESSAGES } from "@/utils/toastMessage";
@@ -174,11 +173,13 @@ const MyPets = () => {
   
         {isFormVisible && (
           <AddPetForm
-            newPet={newPet}
+            petData={newPet}
             speciesList={speciesList}
             onInputChange={handleInputChange}
             onFileChange={handleFileChange}
             onSubmit={handleCreatePet}
+            isEditing={false}
+            isOpen={isFormVisible}
           />
         )}
   
@@ -187,18 +188,19 @@ const MyPets = () => {
             pet={selectedPet}
             onEdit={() => handleEditClick(selectedPet)}
             onDelete={() => handleDeletePet(selectedPet._id)}
-          >
-          </PetDetailsLayout>
+          />
         )}
   
         {editingPet && editingPet._id === selectedPet._id && (
-          <EditPetForm
-            editingPet={editingPet}
+          <AddPetForm
+            petData={editingPet}
             speciesList={speciesList}
             onInputChange={(e) => handleInputChange(e, true)}
             onFileChange={(e) => handleFileChange(e, true)}
             onSubmit={handleUpdatePet}
             onCancel={() => setEditingPet(null)}
+            isEditing={true}
+            isOpen={true}
           />
         )}
       </div>

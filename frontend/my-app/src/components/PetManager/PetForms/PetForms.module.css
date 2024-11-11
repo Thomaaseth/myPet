@@ -1,12 +1,12 @@
-.addPetFormContainer,
-.editFormOverlay {
+/* Form containers */
+.addPetFormContainer {
   padding: 20px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.editFormOverlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -16,16 +16,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
-.addPetForm,
-.editPetForm {
+.modalContent {
   width: 100%;
   max-width: 500px;
-  margin: 0 auto;
-  padding: 20px;
   background: white;
   border-radius: 8px;
+  padding: 20px;
+}
+
+/* Header styles */
+.modalHeader {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.modalHeader h2 {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.modalHeader p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Form styles */
+.visitForm {
+  width: 100%;
+  margin: 0 auto;
 }
 
 .formGroup {
@@ -55,11 +76,14 @@
   box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.1);
 }
 
-.formActions {
+/* Footer styles */
+.modalFooter {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
 
 .submitButton,

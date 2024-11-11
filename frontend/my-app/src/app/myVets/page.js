@@ -8,7 +8,6 @@ import { toast } from 'react-toastify';
 import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
 import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
-import EditVetForm from '@/components/VetManager/VetForms/editVetForm';
 import VetDetailsLayout from '@/components/layouts/VetDetailsLayout';
 import styles from './Vets.module.css';
 
@@ -61,7 +60,6 @@ const MyVets = () => {
             if (pet) {
                 setSelectedVet(null);
                 setActiveTab('add');
-                setIsAddingVet(true);
                 setSelectedPet(pet);
                 fetchVetsForPet(petId);
             } else {
@@ -92,7 +90,7 @@ const MyVets = () => {
             } else {
                 setActiveTab('add');
                 setSelectedVet(null);
-                setIsAddingVet(false);
+                setIsAddingVet(true);
             }
         } catch (error) {
             toast.error('Failed to fetch veterinarians');
@@ -329,11 +327,12 @@ const MyVets = () => {
                             />
     
                             <div className={styles.content}>
-                                {isAddingVet ? (
+                            {isAddingVet && !editingVet ? (
                                     <AddVetForm
                                         formData={formData}
                                         onChange={handleVetFormChange}
                                         onSubmit={handleAddVet}
+                                        isEditing={false}
                                     />
                                 ) : selectedVet ? (
                                     <VetDetailsLayout
@@ -368,11 +367,13 @@ const MyVets = () => {
             )}
     
             {editingVet && (
-                <EditVetForm
+                <AddVetForm
                     formData={editingVet}
                     onChange={handleEditVetFormChange}
                     onSubmit={handleUpdateVet}
                     onCancel={() => setEditingVet(null)}
+                    isEditing={true}
+                    isOpen={true}
                 />
             )}
         </div>
