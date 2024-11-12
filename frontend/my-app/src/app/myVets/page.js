@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getVets, getPets, createVet, updateVet, deleteVet, getVetPastVisits, getNextAppointment, createPastVisit, updatePastVisit, deletePastVisit, scheduleNextAppointment, updateNextAppointment, cancelNextAppointment  } from '@/lib/api';
+import { getVets, getPets, createVet, updateVet, deleteVet, getVetPastVisits, getNextAppointment, createPastVisit, updatePastVisit, deletePastVisit, scheduleNextAppointment, updateNextAppointment, deleteNextAppointment  } from '@/lib/api';
 import { toast } from 'react-toastify';
 import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
@@ -290,7 +290,7 @@ const MyVets = () => {
     const handleDeleteUpcomingVisit = async (visitId) => {
         if (window.confirm('Are you sure you want to cancel this appointment?')) {
             try {
-                await cancelNextAppointment(selectedPet._id, selectedVet._id, visitId);
+                await deleteNextAppointment(selectedPet._id, selectedVet._id, visitId);
                 toast.success('Appointment cancelled successfully');
                 fetchVetVisits();
             } catch (error) {

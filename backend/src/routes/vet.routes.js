@@ -179,12 +179,33 @@ router.delete('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
             });
         }
 
+         // Delete next appointment if exists
+         const nextAppointment = await NextAppointment.findOne({
+            pet: req.params.petId,
+            vet: req.params.vetId
+        });
+
+        if (nextAppointment) {
+            // Remove appointment reference from pet
+            await Pet.findByIdAndUpdate(req.params.petId, {
+                $unset: { nextAppointment: "" }
+            });
+
+            // Remove appointment reference from vet
+            await Vet.findByIdAndUpdate(req.params.vetId, {
+                $pull: { appointments: nextAppointment._id }
+            });
+
+            // Delete the appointment itself
+            await NextAppointment.findByIdAndDelete(nextAppointment._id);
+        }
+
 
         // If vet has no more pets, optionally delete the vet
         const vet = await Vet.findById(req.params.vetId);
         if (vet && vet.pets.length === 0) {
             await PastVisit.deleteMany({ vet: req.params.vetId });
-
+            await NextAppointment.deleteMany({ vet: req.params.vetId });
             await Vet.findByIdAndDelete(req.params.vetId);
         }
 

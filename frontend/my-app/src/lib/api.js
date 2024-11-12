@@ -449,7 +449,7 @@ export const updateNextAppointment = async (petId, vetId, appointmentId, appoint
     }
 };
 
-export const cancelNextAppointment = async (petId, vetId, appointmentId) => {
+export const deleteNextAppointment = async (petId, vetId, appointmentId) => {
     try {
         const response = await api.delete(
             `/api/pets/${petId}/vets/${vetId}/next-appointment/${appointmentId}`

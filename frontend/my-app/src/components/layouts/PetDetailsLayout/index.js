@@ -26,9 +26,9 @@ const PetDetailsLayout = ({
         <VetWidget pet={pet} />
         <div className={styles.weightTrackerContainer}>
         <WeightTracker 
-                        petId={pet._id}
-                        initialWeight={pet.weight}
-                    />
+          petId={pet._id}
+          initialWeight={pet.weight}
+          />
         </div>
       </div>
     </div>
