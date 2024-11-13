@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
 import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
+import VetSuggestions from '@/components/VetManager/VetSuggestions';
 import VetDetailsLayout from '@/components/layouts/VetDetailsLayout';
 import styles from './Vets.module.css';
 
@@ -24,6 +25,8 @@ const MyVets = () => {
     const [activeTab, setActiveTab] = useState('add');
     const [isAddingVet, setIsAddingVet] = useState(false);
     const [selectedVet, setSelectedVet] = useState(null);
+    const [existingVets, setExistingVets] = useState([]);
+    const [otherPets, setOtherPets] = useState([]);
     const [visits, setVisits] = useState([]);
     const [pastVisits, setPastVisits] = useState([]);
     const [nextAppointment, setNextAppointment] = useState(null);
@@ -35,7 +38,6 @@ const MyVets = () => {
         contactInfo: { email: '', phone: '' }
     });
 
-    // Fetch all pets
     useEffect(() => {
         fetchPets();
     }, []);
@@ -53,7 +55,10 @@ const MyVets = () => {
         }
     }, [action]);
 
-    // When we have petId and pets, set the selected pet
+    const prepareOtherPets = (selectedPetId) => {
+        setOtherPets(pets.filter(pet => pet._id !== selectedPetId));
+    };
+
     useEffect(() => {
         if (petId && pets.length > 0) {
             const pet = pets.find(p => p._id === petId);
@@ -61,6 +66,7 @@ const MyVets = () => {
                 setSelectedVet(null);
                 setActiveTab('add');
                 setSelectedPet(pet);
+                prepareOtherPets(pet._id);
                 fetchVetsForPet(petId);
             } else {
                 toast.error('Pet not found');
@@ -83,20 +89,26 @@ const MyVets = () => {
         try {
             const response = await getVets(id);
             setVets(response.data);
-            if (response.data.length > 0) {
-                setActiveTab(response.data[0]._id);
-                setSelectedVet(response.data[0]);
-                setIsAddingVet(false);
-            } else {
+            
+            // Only update these if we're not already adding a vet
+            if (!isAddingVet) {
+                if (response.data.length > 0) {
+                    setActiveTab(response.data[0]._id);
+                    setSelectedVet(response.data[0]);
+                    setIsAddingVet(false);
+                } else {
+                    setActiveTab('add');
+                    setSelectedVet(null);
+                    setIsAddingVet(true);
+                }
+            }
+        } catch (error) {
+            toast.error('Failed to fetch veterinarians');
+            if (!isAddingVet) {
                 setActiveTab('add');
                 setSelectedVet(null);
                 setIsAddingVet(true);
             }
-        } catch (error) {
-            toast.error('Failed to fetch veterinarians');
-            setActiveTab('add');
-            setSelectedVet(null);
-            setIsAddingVet(false);
         } finally {
             setIsLoading(false);
         }
@@ -111,16 +123,12 @@ const MyVets = () => {
     const fetchVetVisits = async () => {
         if (!selectedVet) return;
         try {
-            // Fetch both types of visits in parallel
             const [pastVisitsResponse, nextAppointmentResponse] = await Promise.all([
                 getVetPastVisits(selectedPet._id, selectedVet._id),
                 getNextAppointment(selectedPet._id, selectedVet._id)
             ]);
     
-            // Set past visits
             setPastVisits(pastVisitsResponse.data || []);
-            
-            // Set next appointment if exists
             setNextAppointment(nextAppointmentResponse.data || null);
     
         } catch (error) {
@@ -191,11 +199,39 @@ const MyVets = () => {
         }
     };
 
-    const handleAddVet = async (e) => {
-        e.preventDefault();
+    const handleAddExistingVet = async (petId, vet) => {
         try {
-            await createVet(selectedPet._id, formData);
-            toast.success('Veterinarian added successfully');
+          // Create a new vet for the current pet using the existing vet's data
+          await createVet(petId, {
+            clinicName: vet.clinicName,
+            vetName: vet.vetName,
+            address: vet.address,
+            contactInfo: vet.contactInfo
+          });
+          
+          toast.success('Veterinarian added successfully');
+          fetchVetsForPet(petId);
+        } catch (error) {
+          toast.error('Failed to add veterinarian');
+        }
+      };
+
+    const handleAddVet = async (e, selectedPets) => {
+        e?.preventDefault();
+        try {
+            const newVetResponse = await createVet(selectedPet._id, formData);
+            
+            if (selectedPets && Object.keys(selectedPets).length > 0) {
+                const promises = Object.keys(selectedPets)
+                    .filter(petId => selectedPets[petId])
+                    .map(petId => createVet(petId, formData));
+                
+                await Promise.all(promises);
+                toast.success('Veterinarian added and shared successfully');
+            } else {
+                toast.success('Veterinarian added successfully');
+            }
+    
             fetchVetsForPet(selectedPet._id);
             resetForm();
             setIsAddingVet(false);
@@ -230,6 +266,7 @@ const MyVets = () => {
         }
     };
 
+    // Visit handlers remain the same
     const handleAddVisit = async (visitData) => {
         try {
             await createPastVisit(selectedPet._id, selectedVet._id, visitData);
@@ -327,31 +364,59 @@ const MyVets = () => {
                             />
     
                             <div className={styles.content}>
-                            {isAddingVet && !editingVet ? (
-                                    <AddVetForm
-                                        formData={formData}
-                                        onChange={handleVetFormChange}
-                                        onSubmit={handleAddVet}
-                                        isEditing={false}
-                                    />
-                                ) : selectedVet ? (
-                                    <VetDetailsLayout
-                                        vet={selectedVet}
-                                        pastVisits={pastVisits}
-                                        nextAppointment={nextAppointment}
-                                        onEdit={() => setEditingVet(selectedVet)}
-                                        onDelete={() => handleDeleteVet(selectedVet._id)}
-                                        onAddPastVisit={handleAddVisit}
-                                        onEditPastVisit={handleEditVisit}
-                                        onDeletePastVisit={handleDeleteVisit}
-                                        onAddNextAppointment={handleAddUpcomingVisit}
-                                        onEditNextAppointment={handleEditUpcomingVisit}
-                                        onDeleteNextAppointment={handleDeleteUpcomingVisit}
-                                    />
+                                {isLoading ? (
+                                    <div className={styles.loading}>Loading...</div>
                                 ) : (
-                                    <div className={styles.noVetSelected}>
-                                        <p>No veterinarian selected. Click the "+" tab to add a new veterinarian.</p>
-                                    </div>
+                                    isAddingVet && !editingVet ? (
+                                        <>
+                                        {/* Show suggestions first if there are vets from other pets */}
+                                        {vets.length === 0 && (
+                                          <VetSuggestions
+                                            existingVets={pets
+                                              .filter(p => p._id !== selectedPet._id) // Get other pets
+                                              .flatMap(p => p.vets) // Get their vets
+                                              .filter((vet, index, self) => // Remove duplicates
+                                                index === self.findIndex(v => v._id === vet._id)
+                                              )}
+                                            currentPet={selectedPet}
+                                            onAddExistingVet={(vet) => {
+                                              handleAddExistingVet(selectedPet._id, vet);
+                                            }}
+                                            onSkip={() => setShowVetForm(true)}
+                                          />
+                                        )}
+                                        <AddVetForm
+                                            formData={formData}
+                                            onChange={handleVetFormChange}
+                                            onSubmit={handleAddVet}
+                                            onCancel={() => setIsAddingVet(false)}
+                                            isEditing={false}
+                                            otherPets={otherPets}
+                                            existingVets={vets.filter(v => 
+                                                !v.pets.includes(selectedPet._id)
+                                            )}
+                                            isOpen={true}
+                                        />
+                                        </>
+                                    ) : selectedVet ? (
+                                        <VetDetailsLayout
+                                            vet={selectedVet}
+                                            pastVisits={pastVisits}
+                                            nextAppointment={nextAppointment}
+                                            onEdit={() => setEditingVet(selectedVet)}
+                                            onDelete={() => handleDeleteVet(selectedVet._id)}
+                                            onAddPastVisit={handleAddVisit}
+                                            onEditPastVisit={handleEditVisit}
+                                            onDeletePastVisit={handleDeleteVisit}
+                                            onAddNextAppointment={handleAddUpcomingVisit}
+                                            onEditNextAppointment={handleEditUpcomingVisit}
+                                            onDeleteNextAppointment={handleDeleteUpcomingVisit}
+                                        />
+                                    ) : (
+                                        <div className={styles.noVetSelected}>
+                                            <p>No veterinarian selected. Click the "+" tab to add a new veterinarian.</p>
+                                        </div>
+                                    )
                                 )}
                             </div>
                         </>
@@ -374,6 +439,8 @@ const MyVets = () => {
                     onCancel={() => setEditingVet(null)}
                     isEditing={true}
                     isOpen={true}
+                    otherPets={[]}
+                    existingVets={[]}
                 />
             )}
         </div>

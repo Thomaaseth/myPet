@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import PastVisitsList from './PastVisits/pastVisitsList';
-import NextVisitCard from './UpcomingVisit/upcomingVisitCard';
+import NextVisitCard from './NextAppointment/upcomingVisitCard';
 import PastVisitForm from './VetVisitForms/pastVisitForm';
 import UpcomingVisitForm from './VetVisitForms/upcomingVisitForm';
-import UpcomingVisitCard from './UpcomingVisit/upcomingVisitCard';
+import UpcomingVisitCard from './NextAppointment/upcomingVisitCard';
 import styles from './VisitManager.module.css';
 
 const VisitManager = ({
