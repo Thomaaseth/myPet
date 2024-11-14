@@ -120,6 +120,7 @@ router.post('/pets/:petId/vets', isAuthenticated, async (req, res) => {
     }
 });
 
+
 // Update vet
 router.put('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
     try {
@@ -236,6 +237,34 @@ router.delete('/pets/:petId/vets/:vetId', isAuthenticated, async (req, res) => {
         res.status(400).json({ message: 'Error removing vet', error: error.toString() });
     }
 });
+
+router.post('/pets/:petId/vets/:vetId/unlink', isAuthenticated, async (req, res) => {
+    try {
+      const pet = await Pet.findOne({ 
+        _id: req.params.petId, 
+        user: req.user._id 
+      });
+  
+      if (!pet) {
+        return res.status(404).json({ message: 'Pet not found' });
+      }
+  
+      // Remove vet from pet's vets array
+      pet.vets = pet.vets.filter(v => v.toString() !== req.params.vetId);
+      await pet.save();
+  
+      // Remove pet from vet's pets array
+      await Vet.findByIdAndUpdate(req.params.vetId, {
+        $pull: { pets: pet._id }
+      });
+  
+      res.status(200).json({
+        message: 'Vet unlinked successfully'
+      });
+    } catch (error) {
+      res.status(400).json({ message: 'Error unlinking vet', error: error.toString() });
+    }
+  });
 
 // VISITS ROUTES
 

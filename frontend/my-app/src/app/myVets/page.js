@@ -3,12 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getVets, getPets, createVet, updateVet, deleteVet, getVetPastVisits, getNextAppointment, createPastVisit, updatePastVisit, deletePastVisit, scheduleNextAppointment, updateNextAppointment, deleteNextAppointment  } from '@/lib/api';
+import { getVets, getPets, createVet, updateVet, deleteVet, unlinkVet, getVetPastVisits, getNextAppointment, createPastVisit, updatePastVisit, deletePastVisit, scheduleNextAppointment, updateNextAppointment, deleteNextAppointment  } from '@/lib/api';
 import { toast } from 'react-toastify';
 import PetTabs from '@/components/VetManager/PetTabs';
 import VetTabs from '@/components/VetManager/VetTabs';
 import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
 import VetSuggestions from '@/components/VetManager/VetSuggestions';
+import VetsQuickManager from '@/components/VetManager/VetQuickManager';
 import VetDetailsLayout from '@/components/layouts/VetDetailsLayout';
 import styles from './Vets.module.css';
 
@@ -27,6 +28,7 @@ const MyVets = () => {
     const [selectedVet, setSelectedVet] = useState(null);
     const [existingVets, setExistingVets] = useState([]);
     const [processedVets, setProcessedVets] = useState(new Set());
+    const [showManageVets, setShowManageVets] = useState(false);
     const [otherPets, setOtherPets] = useState([]);
     const [visits, setVisits] = useState([]);
     const [pastVisits, setPastVisits] = useState([]);
@@ -279,6 +281,60 @@ const MyVets = () => {
         }
     };
 
+      // Get all unique vets across all pets
+  const getAllVets = () => {
+    return Array.from(
+      new Set(
+        pets.flatMap(pet => 
+          pet.vets.map(vet => JSON.stringify(vet))
+        )
+      )
+    ).map(vet => JSON.parse(vet));
+  };
+
+  const handleManageVets = async (petVets) => {
+    try {
+        await Promise.all(
+            Object.entries(petVets).map(async ([petId, vetIds]) => {
+                const pet = pets.find(p => p._id === petId);
+                const currentVetIds = pet.vets.map(v => v._id);
+                
+                // Add new vets that were checked
+                const vetsToAdd = vetIds.filter(id => !currentVetIds.includes(id));
+                if (vetsToAdd.length > 0) {
+                    await Promise.all(
+                        vetsToAdd.map(vetId => {
+                            const vet = getAllVets().find(v => v._id === vetId);
+                            return createVet(petId, {
+                                clinicName: vet.clinicName,
+                                vetName: vet.vetName,
+                                address: vet.address,
+                                contactInfo: vet.contactInfo
+                            });
+                        })
+                    );
+                }
+
+                // Remove unselected vets
+                const vetsToRemove = currentVetIds.filter(id => !vetIds.includes(id));
+                if (vetsToRemove.length > 0) {
+                    await Promise.all(
+                        vetsToRemove.map(vetId => unlinkVet(petId, vetId))
+                    );
+                }
+            })
+        );
+            
+        toast.success('Vet assignments updated successfully');
+        setShowManageVets(false);
+        await fetchVetsForPet(selectedPet._id);
+        await fetchPets(); // Refresh all pets data
+    } catch (error) {
+        console.error('Error updating vet assignments:', error);
+        toast.error(`Failed to update vet assignments: ${error.message}`);
+    }
+};
+
     // Visit handlers remain the same
     const handleAddVisit = async (visitData) => {
         try {
@@ -374,7 +430,16 @@ const MyVets = () => {
                                 activeTab={activeTab}
                                 onTabClick={handleTabClick}
                                 onDeleteVet={handleDeleteVet}
+                                onManageVets={() => setShowManageVets(true)}
                             />
+                            {showManageVets && (
+                            <VetsQuickManager
+                                pets={pets}
+                                allVets={getAllVets()}
+                                onSave={handleManageVets}
+                                onClose={() => setShowManageVets(false)}
+                                />
+                            )}
     
                             <div className={styles.content}>
                                 {isLoading ? (
@@ -413,7 +478,7 @@ const MyVets = () => {
                                             isEditing={false}
                                             otherPets={otherPets}
                                             existingVets={vets.filter(v => 
-                                                !v.pets.includes(selectedPet._id)
+                                            !v.pets.includes(selectedPet._id)
                                             )}
                                             isOpen={true}
                                         />

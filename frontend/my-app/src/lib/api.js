@@ -303,6 +303,17 @@ export const deleteVet = async (petId, vetId) => {
     }
 };
 
+export const unlinkVet = async (petId, vetId) => {
+    try {
+        const response = await api.post(`/api/pets/${petId}/vets/${vetId}/unlink`);
+        return response.data;
+    } catch (error) {
+        console.error('Error unlinking vet:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+
 // Vet visit operations
 
 // Get operations
