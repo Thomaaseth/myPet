@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './VetForms.module.css';
 
 const AddVetForm = ({
@@ -10,32 +10,10 @@ const AddVetForm = ({
   onCancel,
   isOpen = false,
   isEditing = false,
-  otherPets = [],
-  existingVets = []
+  otherPets = []
 }) => {
-  const [showSuggestion, setShowSuggestion] = useState(false);
-  const [matchedVet, setMatchedVet] = useState(null);
   const [showSharingModal, setShowSharingModal] = useState(false);
   const [selectedPets, setSelectedPets] = useState({});
-
-  // Check for matches as user types
-  useEffect(() => {
-    if (!isEditing && (formData.clinicName.length > 3 || formData.vetName.length > 3 || formData.contactInfo.phone.length > 3)) {
-      const match = existingVets.find(vet => 
-        vet.clinicName.toLowerCase().includes(formData.clinicName.toLowerCase()) ||
-        vet.vetName.toLowerCase().includes(formData.vetName.toLowerCase()) ||
-        vet.contactInfo.phone === formData.contactInfo.phone
-      );
-      
-      if (match && !showSuggestion) {
-        setMatchedVet({
-          ...match,
-          petName: match.pets?.[0]?.name || 'another pet' // Fallback if pet name isn't available
-        });
-        setShowSuggestion(true);
-      }
-    }
-  }, [formData.clinicName, formData.vetName, formData.contactInfo.phone, isEditing, existingVets]);
 
   const handleFormSubmit = async (e) => {
     e?.preventDefault();
@@ -48,53 +26,6 @@ const AddVetForm = ({
     }
   };
 
-  const handleUseExistingVet = () => {
-    // Update all relevant fields from matched vet
-    onChange({
-      target: {
-        name: 'clinicName',
-        value: matchedVet.clinicName
-      }
-    });
-    onChange({
-      target: {
-        name: 'vetName',
-        value: matchedVet.vetName
-      }
-    });
-    onChange({
-      target: {
-        name: 'contactInfo.phone',
-        value: matchedVet.contactInfo.phone
-      }
-    });
-    onChange({
-      target: {
-        name: 'contactInfo.email',
-        value: matchedVet.contactInfo.email
-      }
-    });
-    onChange({
-      target: {
-        name: 'address.street',
-        value: matchedVet.address.street
-      }
-    });
-    onChange({
-      target: {
-        name: 'address.city',
-        value: matchedVet.address.city
-      }
-    });
-    onChange({
-      target: {
-        name: 'address.zipCode',
-        value: matchedVet.address.zipCode
-      }
-    });
-    setShowSuggestion(false);
-  };
-
   if (!isOpen && isEditing) return null;
 
   return (
@@ -103,36 +34,6 @@ const AddVetForm = ({
         <div className={styles.modalHeader}>
           <h2>{isEditing ? 'Edit Veterinarian Contact' : 'Add New Veterinarian'}</h2>
         </div>
-
-        {/* Suggestion Alert */}
-        {showSuggestion && matchedVet && (
-          <div className={styles.suggestionAlert}>
-            <div className={styles.suggestionContent}>
-              <p>We found a similar vet from {matchedVet.petName}:</p>
-              <div className={styles.matchedVetInfo}>
-                <p><strong>Clinic:</strong> {matchedVet.clinicName}</p>
-                <p><strong>Vet:</strong> {matchedVet.vetName}</p>
-                <p><strong>Phone:</strong> {matchedVet.contactInfo.phone}</p>
-              </div>
-              <div className={styles.suggestionActions}>
-                <button 
-                  type="button"
-                  onClick={handleUseExistingVet}
-                  className={styles.useExistingButton}
-                >
-                  Use this vet's information
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setShowSuggestion(false)}
-                  className={styles.newVetButton}
-                >
-                  Continue with new vet
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         <form onSubmit={handleFormSubmit} className={styles.vetForm}>
           <div className={styles.formGroup}>

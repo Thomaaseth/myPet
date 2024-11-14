@@ -26,6 +26,7 @@ const MyVets = () => {
     const [isAddingVet, setIsAddingVet] = useState(false);
     const [selectedVet, setSelectedVet] = useState(null);
     const [existingVets, setExistingVets] = useState([]);
+    const [processedVets, setProcessedVets] = useState(new Set());
     const [otherPets, setOtherPets] = useState([]);
     const [visits, setVisits] = useState([]);
     const [pastVisits, setPastVisits] = useState([]);
@@ -74,6 +75,12 @@ const MyVets = () => {
             }
         }
     }, [petId, pets]);
+
+    useEffect(() => {
+        if (petId) {
+            setProcessedVets(new Set());
+        }
+    }, [petId]);
 
     const fetchPets = async () => {
         try {
@@ -208,13 +215,19 @@ const MyVets = () => {
             address: vet.address,
             contactInfo: vet.contactInfo
           });
-          
+
+          setProcessedVets(prev => new Set([...prev, vet._id]));
+          await fetchVetsForPet(petId);
           toast.success('Veterinarian added successfully');
-          fetchVetsForPet(petId);
         } catch (error) {
           toast.error('Failed to add veterinarian');
         }
       };
+      
+      const handleSkipVet = (vetId) => {
+        // Add skipped vet to processed set
+        setProcessedVets(prev => new Set([...prev, vetId]));
+    };
 
     const handleAddVet = async (e, selectedPets) => {
         e?.preventDefault();
@@ -370,21 +383,21 @@ const MyVets = () => {
                                     isAddingVet && !editingVet ? (
                                         <>
                                         {/* Show suggestions first if there are vets from other pets */}
-                                        {vets.length === 0 && (
                                           <VetSuggestions
                                             existingVets={pets
                                               .filter(p => p._id !== selectedPet._id) // Get other pets
                                               .flatMap(p => p.vets) // Get their vets
-                                              .filter((vet, index, self) => // Remove duplicates
-                                                index === self.findIndex(v => v._id === vet._id)
+                                              .filter((vet, index, self) => 
+                                                index === self.findIndex(v => v._id === vet._id) && // Remove duplicates
+                                                !vets.some(v => v._id === vet._id) && // Remove already added vets
+                                                !processedVets.has(vet._id) // Remove processed vets
                                               )}
                                             currentPet={selectedPet}
                                             onAddExistingVet={(vet) => {
-                                              handleAddExistingVet(selectedPet._id, vet);
+                                            handleAddExistingVet(selectedPet._id, vet);
                                             }}
-                                            onSkip={() => setShowVetForm(true)}
-                                          />
-                                        )}
+                                            onSkip={(vetId) => handleSkipVet(vetId)}
+                                            />
                                         <AddVetForm
                                             formData={formData}
                                             onChange={handleVetFormChange}

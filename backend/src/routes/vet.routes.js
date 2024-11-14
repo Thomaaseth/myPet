@@ -15,21 +15,41 @@ const upload = multer({ dest: 'uploads/vet-documents/' });
 // Get all vets for a specific pet
 router.get('/pets/:petId/vets', isAuthenticated, async (req, res) => {
     try {
+        // Get all pets for the current user
+        const userPets = await Pet.find({ user: req.user._id });
+        const userPetIds = userPets.map(p => p._id);
+
+        // Get the current pet with populated vets
         const pet = await Pet.findOne({ 
             _id: req.params.petId, 
             user: req.user._id 
-        }).populate('vets');
+        }).populate({
+            path: 'vets'
+        });
 
         if (!pet) {
             return res.status(404).json({ message: 'Pet not found' });
         }
 
+        // For each vet, get their associated pets that belong to the user
+        const associatedVets = await Promise.all(pet.vets.map(async (vet) => {
+            const vetWithPets = await Vet.findById(vet._id).populate({
+                path: 'pets',
+                match: { _id: { $in: userPetIds } },
+                select: 'name'
+            });
+            return vetWithPets;
+        }));
+
         res.status(200).json({
             message: 'Vets retrieved successfully',
-            data: pet.vets || []
+            data: associatedVets || []
         });
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching vets', error: error.toString() });
+        res.status(500).json({ 
+            message: 'Error fetching vets', 
+            error: error.toString() 
+        });
     }
 });
 

@@ -17,9 +17,13 @@ const VetSuggestions = ({
         <div key={vet._id} className={styles.suggestedVetCard}>
           <div className={styles.suggestedVetInfo}>
             <h4>{vet.clinicName}</h4>
-            <p>Dr. {vet.vetName}</p>
+            <p>{vet.vetName}</p>
             <p className={styles.associatedPet}>
-              Currently associated with: {vet.pets.map(pet => pet.name).join(', ')}
+              Currently associated with: {
+                                Array.isArray(vet.pets) && vet.pets.length > 0
+                                    ? vet.pets.map(pet => pet.name || 'Unnamed Pet').join(', ')
+                                    : 'No pets'
+                                }
             </p>
           </div>
           <div className={styles.suggestedVetActions}>
@@ -30,7 +34,7 @@ const VetSuggestions = ({
               Add to {currentPet.name}
             </button>
             <button
-              onClick={onSkip}
+              onClick={() => onSkip(vet._id)}
               className={styles.skipButton}
             >
               Skip
