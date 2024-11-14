@@ -386,12 +386,19 @@ const MyVets = () => {
                                           <VetSuggestions
                                             existingVets={pets
                                               .filter(p => p._id !== selectedPet._id) // Get other pets
-                                              .flatMap(p => p.vets) // Get their vets
-                                              .filter((vet, index, self) => 
-                                                index === self.findIndex(v => v._id === vet._id) && // Remove duplicates
-                                                !vets.some(v => v._id === vet._id) && // Remove already added vets
-                                                !processedVets.has(vet._id) // Remove processed vets
-                                              )}
+                                              .flatMap(p => {
+                                                // Get those pets' vets and ensure they have pets populated
+                                                return p.vets.map(vet => ({
+                                                    ...vet,
+                                                    pets: vet.pets || []
+                                                }));
+                                            })
+                                            .filter((vet, index, self) => {
+                                                // Keep vet if:
+                                                return index === self.findIndex(v => v._id === vet._id) && // Not duplicate
+                                                       !vets.some(v => v._id === vet._id) && // Not already added to current pet
+                                                       !processedVets.has(vet._id); // Not processed (skipped/added)
+                                            })}
                                             currentPet={selectedPet}
                                             onAddExistingVet={(vet) => {
                                             handleAddExistingVet(selectedPet._id, vet);
