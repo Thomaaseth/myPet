@@ -281,16 +281,23 @@ const MyVets = () => {
         }
     };
 
-      // Get all unique vets across all pets
-  const getAllVets = () => {
-    return Array.from(
-      new Set(
-        pets.flatMap(pet => 
-          pet.vets.map(vet => JSON.stringify(vet))
-        )
-      )
-    ).map(vet => JSON.parse(vet));
-  };
+    // Get all unique vets across all pets
+    const getAllVets = () => {
+    // Get all vets from all pets
+    const allVets = pets.flatMap(pet => pet.vets);
+    
+    // Create a Map to deduplicate by vetId
+    const uniqueVets = new Map();
+    
+    allVets.forEach(vet => {
+        if (!uniqueVets.has(vet._id)) {
+            uniqueVets.set(vet._id, vet);
+        }
+    });
+    
+    // Convert Map back to array
+    return Array.from(uniqueVets.values());
+};
 
   const handleManageVets = async (petVets) => {
     try {
