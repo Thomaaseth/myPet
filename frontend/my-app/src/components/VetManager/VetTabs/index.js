@@ -14,17 +14,17 @@ const VetTabs = ({
         {vets.map(vet => (
           <button
             key={vet._id}
-            className={`${styles.tab} ${activeTab === vet._id ? styles.active : ''}`}
+            className={`${styles.vetTab} ${activeTab === vet._id ? styles.active : ''}`}
             onClick={() => onTabClick(vet._id)}
           >
             {vet.clinicName}
           </button>
         ))}
         <button
-          className={`${styles.tab} ${activeTab === 'add' ? styles.active : ''}`}
+          className={`${styles.vetTab} ${styles.addVetTab} ${activeTab === 'add' ? styles.active : ''}`}
           onClick={() => onTabClick('add')}
         >
-          + Add Vet
+          + Add New Veterinarian
         </button>
         <button
           className={styles.manageButton}

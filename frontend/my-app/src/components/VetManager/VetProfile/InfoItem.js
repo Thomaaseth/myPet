@@ -4,7 +4,7 @@ import styles from './VetProfile.module.css';
 const InfoItem = ({ label, value }) => {
   return (
     <div className={styles.infoItem}>
-      <label>{label}:</label>
+      <label>{label}: </label>
       <span>{value}</span>
     </div>
   );
