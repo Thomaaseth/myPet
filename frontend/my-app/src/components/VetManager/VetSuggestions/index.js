@@ -20,10 +20,10 @@ const VetSuggestions = ({
             <p>{vet.vetName}</p>
             <p className={styles.associatedPet}>
               Currently associated with: {
-                                Array.isArray(vet.pets) && vet.pets.length > 0
-                                    ? vet.pets.map(pet => pet.name || 'Unnamed Pet').join(', ')
-                                    : 'No pets'
-                                }
+              Array.isArray(vet.pets) && vet.pets.length > 0
+              ? vet.pets.map(pet => pet.name || 'Unnamed Pet').join(', ')
+              : 'No pets'
+              }
             </p>
           </div>
           <div className={styles.suggestedVetActions}>

@@ -26,11 +26,9 @@ const MyVets = () => {
     const [activeTab, setActiveTab] = useState('add');
     const [isAddingVet, setIsAddingVet] = useState(false);
     const [selectedVet, setSelectedVet] = useState(null);
-    const [existingVets, setExistingVets] = useState([]);
     const [processedVets, setProcessedVets] = useState(new Set());
     const [showManageVets, setShowManageVets] = useState(false);
     const [otherPets, setOtherPets] = useState([]);
-    const [visits, setVisits] = useState([]);
     const [pastVisits, setPastVisits] = useState([]);
     const [nextAppointment, setNextAppointment] = useState(null);
     const [isLoading, setIsLoading] = useState(true);

@@ -27,9 +27,12 @@ require('./src/config/config')(app);
 const authRoutes = require('./src/routes/auth.routes');
 const petRoutes = require('./src/routes/pet.routes');
 const vetRoutes = require('./src/routes/vet.routes');
+const documentRoutes = require('./src/routes/doc.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/pets', petRoutes);
+app.use('/api', documentRoutes);
+
 app.use('/api/', vetRoutes);
 
 // Error handling
