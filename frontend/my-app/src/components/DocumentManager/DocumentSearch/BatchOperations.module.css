@@ -1,0 +1,43 @@
+.batch-operations {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.375rem;
+    margin: 1rem 0;
+  }
+  
+  .selected-count {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #1e40af;
+  }
+  
+  .batch-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+  
+  .batch-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.25rem;
+    background-color: white;
+    font-size: 0.875rem;
+    color: #1e40af;
+    transition: all 0.2s ease;
+  }
+  
+  .batch-btn:hover {
+    background-color: #dbeafe;
+  }
+  
+  .batch-icon {
+    width: 1rem;
+    height: 1rem;
+  }

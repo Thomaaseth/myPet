@@ -3,6 +3,7 @@
 import React from "react"
 import VetProfile from "@/components/VetManager/VetProfile"
 import VisitManager from "@/components/VetManager/VisitManager/"
+import DocumentManager from "@/components/DocumentManager"
 import styles from './VetDetailsLayout.module.css'
 
 const VetDetailsLayout = ({
@@ -18,6 +19,7 @@ const VetDetailsLayout = ({
     onEditNextAppointment,
     onDeleteNextAppointment,
     onUploadDocument,
+    petId
 }) => {
   return (
     <div className={styles.vetDetails}>
@@ -42,6 +44,13 @@ const VetDetailsLayout = ({
           onDeleteNextAppointment={onDeleteNextAppointment}
           onUploadDocument={onUploadDocument}
         />
+        <div className={styles.documentSection}>
+          <h3>Documents</h3>
+          <DocumentManager 
+            petId={petId}
+            vetId={vet._id} 
+          />
+        </div>
       </div>
     </div>
   );

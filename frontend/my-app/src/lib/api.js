@@ -471,3 +471,161 @@ export const deleteNextAppointment = async (petId, vetId, appointmentId) => {
         throw error.response ? error.response.data : error;
     }
 };
+
+// Documents operations
+
+export const getDocuments = async (petId) => {
+    try {
+        const response = await api.get(`/api/pets/${petId}/documents`, {
+            params: {
+                status: 'ACTIVE' // Default to active documents
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching documents:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const getUploadUrl = async (petId, file) => {
+    try {
+        const response = await api.post(`/api/pets/${petId}/documents/upload-url`, {
+            filename: file.name,
+            fileType: file.type,
+            fileSize: file.size
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error getting upload URL:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const createDocument = async (petId, documentData) => {
+    try {
+        // First get upload URL
+        const { uploadUrl, s3Key } = await getUploadUrl(petId, documentData.file);
+        
+        // Upload to S3
+        await fetch(uploadUrl, {
+            method: 'PUT',
+            body: documentData.file,
+            headers: {
+                'Content-Type': documentData.file.type
+            }
+        });
+
+        // Create document record
+        const response = await api.post(`/api/pets/${petId}/documents`, {
+            name: documentData.name || documentData.file.name,
+            originalName: documentData.file.name,
+            s3Key,
+            mimeType: documentData.file.type,
+            size: documentData.file.size,
+            tags: documentData.tags || [],
+            originalVet: documentData.vetId
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Error creating document:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const updateDocument = async (petId, documentId, updates) => {
+    try {
+        const response = await api.put(
+            `/api/pets/${petId}/documents/${documentId}`,
+            updates
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating document:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const archiveDocument = async (petId, documentId) => {
+    try {
+        const response = await api.put(
+            `/api/pets/${petId}/documents/${documentId}/archive`
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error archiving document:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const deleteDocument = async (petId, documentId) => {
+    try {
+        const response = await api.delete(
+            `/api/pets/${petId}/documents/${documentId}`
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting document:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const searchDocuments = async (petId, params) => {
+    try {
+        const response = await api.get(`/api/pets/${petId}/documents`, {
+            params: {
+                search: params.query,
+                tags: params.tags?.join(','),
+                status: params.status || 'ACTIVE'
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error searching documents:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const updateDocumentTags = async (petId, documentId, tags) => {
+    try {
+        const response = await api.put(
+            `/api/pets/${petId}/documents/${documentId}`,
+            { tags }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error updating document tags:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+// Batch operations
+export const batchUpdateDocuments = async (petId, documentIds, updates) => {
+    try {
+        const response = await api.put(
+            `/api/pets/${petId}/documents/batch`,
+            {
+                documentIds,
+                updates
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error performing batch update:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const batchArchiveDocuments = async (petId, documentIds) => {
+    try {
+        const response = await api.put(
+            `/api/pets/${petId}/documents/batch/archive`,
+            { documentIds }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error performing batch archive:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};

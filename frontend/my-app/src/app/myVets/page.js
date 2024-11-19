@@ -501,6 +501,7 @@ const MyVets = () => {
                                             onAddNextAppointment={handleAddUpcomingVisit}
                                             onEditNextAppointment={handleEditUpcomingVisit}
                                             onDeleteNextAppointment={handleDeleteUpcomingVisit}
+                                            petId={selectedPet._id}
                                         />
                                     ) : (
                                         <div className={styles.noVetSelected}>
