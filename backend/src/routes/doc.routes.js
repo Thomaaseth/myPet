@@ -4,12 +4,18 @@ const { Document, SUGGESTED_TAGS } = require('../models/Document.model');
 const Pet = require('../models/Pet.model');
 const s3Service = require('../services/s3.service');
 const { isAuthenticated } = require('../middleware/jwt.middleware');
+const mongoose = require('mongoose');
+
 
 // Get upload URL for a pet's document
 router.post('/pets/:petId/documents/upload-url', isAuthenticated, async (req, res) => {
   try {
     const { petId } = req.params;
     const { filename, fileType, fileSize } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(petId)) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
 
     // Verify pet belongs to user
     const pet = await Pet.findOne({ _id: petId, user: req.user._id });
@@ -186,6 +192,10 @@ router.put('/pets/:petId/documents/:documentId', isAuthenticated, async (req, re
     
     if (!document) {
       return res.status(404).json({ message: 'Document not found' });
+    }
+
+    if (name !== undefined && !name.trim()) {
+      return res.status(400).json({ message: 'Document name cannot be empty' });
     }
 
     // Update fields

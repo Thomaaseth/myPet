@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../src/models/User.model');
 const Pet = require('../src/models/Pet.model');
 const Vet = require('../src/models/Vet.model');
-const VetVisit = require('../src/models/VetVisit.model');
+// const VetVisit = require('../src/models/VetVisit.model');
 
 const bcrypt = require('bcryptjs');
 
