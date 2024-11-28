@@ -97,3 +97,16 @@
   .removeButton:hover {
     color: #475569;
   }
+
+  .fileNameInput {
+    width: 100%;
+    border: 1px solid transparent;
+    padding: 0.25rem;
+    font-weight: 500;
+    background: none;
+  }
+  
+  .fileNameInput:hover, .fileNameInput:focus {
+    border-color: #e2e8f0;
+    background: white;
+  }

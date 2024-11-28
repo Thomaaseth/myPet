@@ -199,6 +199,11 @@ const handleBatchArchive = async () => {
               file.id === fileId ? { ...file, tags } : file
             ));
           }}
+          onUpdateName={(fileId, name) => {
+            setUploadQueue(prev => prev.map(file => 
+              file.id === fileId ? { ...file, name } : file
+            ));
+          }}
           onRemove={(fileId) => {
             setUploadQueue(prev => 
               prev.filter(file => file.id !== fileId)

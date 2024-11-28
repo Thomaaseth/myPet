@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import styles from './TagInput.module.css';
 
 const TagInput = ({ value = [], onChange, suggestions = [] }) => {
@@ -13,6 +13,14 @@ const TagInput = ({ value = [], onChange, suggestions = [] }) => {
       suggestion.toLowerCase().includes(inputValue.toLowerCase()) &&
       !value.includes(suggestion)
   );
+
+  const submitTag = () => {
+    if (inputValue && !value.includes(inputValue)) {
+      onChange([...value, inputValue]);
+      setInputValue('');
+      setShowSuggestions(false);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -28,10 +36,7 @@ const TagInput = ({ value = [], onChange, suggestions = [] }) => {
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && inputValue) {
       e.preventDefault();
-      if (!value.includes(inputValue)) {
-        onChange([...value, inputValue]);
-      }
-      setInputValue('');
+      submitTag();
     } else if (e.key === 'Backspace' && !inputValue && value.length > 0) {
       onChange(value.slice(0, -1));
     }
@@ -51,19 +56,26 @@ const TagInput = ({ value = [], onChange, suggestions = [] }) => {
             </button>
           </span>
         ))}
-        <input
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={(e) => {
-            setInputValue(e.target.value);
-            setShowSuggestions(true);
-          }}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setShowSuggestions(true)}
-          className={styles.tagInputField}
-          placeholder={value.length === 0 ? "Add tags..." : ""}
-        />
+        <div className={styles.inputWrapper}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setShowSuggestions(true)}
+            className={styles.tagInputField}
+            placeholder={value.length === 0 ? "Add tags..." : ""}
+          />
+          {inputValue && (
+            <button onClick={submitTag} className={styles.addButton}>
+              <Check className={styles.checkIcon} />
+            </button>
+          )}
+        </div>
       </div>
 
       {showSuggestions && filteredSuggestions.length > 0 && (

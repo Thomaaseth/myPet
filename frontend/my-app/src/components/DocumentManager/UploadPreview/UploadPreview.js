@@ -4,7 +4,7 @@ import TagInput from './../TagInput/TagInput';
 import { SUGGESTED_TAGS } from '../../../../src/constants/suggestedTags';
 import styles from './UploadPreview.module.css';
 
-const UploadPreview = ({ files, onUpdateTags, onRemove, onUpload, isUploading }) => {
+const UploadPreview = ({ files, onUpdateTags, onRemove, onUpdateName, onUpload, isUploading }) => {
     return (
         <div className={styles.uploadPreview}>
             <h3 className={styles.title}>Files to Upload</h3>
@@ -26,7 +26,12 @@ const UploadPreview = ({ files, onUpdateTags, onRemove, onUpload, isUploading })
                         </div>
 
                         <div className={styles.fileInfo}>
-                            <div className={styles.fileName}>{file.file.name}</div>
+                        <input
+                            type="text"
+                            value={file.name || file.file.name}
+                            onChange={(e) => onUpdateName(file.id, e.target.value)}
+                            className={styles.fileNameInput}
+                        />
                             <div className={styles.fileSize}>
                                 {(file.file.size / 1024 / 1024).toFixed(2)} MB
                             </div>

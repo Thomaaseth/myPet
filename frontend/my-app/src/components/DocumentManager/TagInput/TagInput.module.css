@@ -1,0 +1,19 @@
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+  }
+  
+  .addButton {
+    padding: 2px;
+    color: #3b82f6;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .checkIcon {
+    width: 16px;
+    height: 16px;
+  }
