@@ -42,7 +42,9 @@ const DocumentManager = ({ petId, vetId }) => {
   const fetchDocuments = async () => {
     try {
       const response = await getDocuments(petId);
-      setDocuments(response.data);
+      console.log('Documents response:', response);
+
+      setDocuments(response.documents || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
     }
@@ -52,7 +54,7 @@ const DocumentManager = ({ petId, vetId }) => {
     if (petId) {
       handleSearch();
     }
-  }, [searchQuery, selectedTags]);
+  }, [petId, searchQuery, selectedTags]);
 
 // Upload handling
 const handleUpload = async () => {
@@ -144,7 +146,7 @@ const handleSearch = async () => {
       tags: selectedTags,
       status: 'ACTIVE'
     });
-    setDocuments(response.data);
+    setDocuments(response.documents || []);
   } catch (error) {
     console.error('Error searching documents:', error);
   }
