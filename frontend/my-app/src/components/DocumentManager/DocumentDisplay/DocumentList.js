@@ -31,8 +31,7 @@ const DocumentList = ({
         </thead>
         <tbody>
           {documents.map(doc => (
-            <tr key={doc._id} className={selectedDocs.includes(doc._id) ? 'selected' : ''}>
-              <td>
+            <tr key={doc._id} className={selectedDocs.includes(doc._id) ? styles.selected : ''}>              <td>
                 <input 
                   type="checkbox"
                   checked={selectedDocs.includes(doc._id)}
