@@ -1,4 +1,4 @@
-.batch-operations {
+.batchOperations {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -9,18 +9,18 @@
     margin: 1rem 0;
   }
   
-  .selected-count {
+  .selectedCount {
     font-size: 0.875rem;
     font-weight: 500;
     color: #1e40af;
   }
   
-  .batch-actions {
+  .batchActions {
     display: flex;
     gap: 0.75rem;
   }
   
-  .batch-btn {
+  .batchBtn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -33,11 +33,11 @@
     transition: all 0.2s ease;
   }
   
-  .batch-btn:hover {
+  .batchBtn:hover {
     background-color: #dbeafe;
   }
   
-  .batch-icon {
+  .batchIcon {
     width: 1rem;
     height: 1rem;
   }

@@ -7,6 +7,7 @@ const DocumentList = ({
   documents = [], 
   selectedDocs = [], 
   onSelectionChange,
+  onEditDocument,
   onUpdateDocument,
   onArchiveDocument,
   onDeleteDocument  
@@ -68,15 +69,24 @@ const DocumentList = ({
               <td>{(doc.size / 1024 / 1024).toFixed(2)} MB</td>
               <td>
               <div className={styles.actions}>
-                <button className={styles.actionBtn}>
+              <button 
+                  onClick={() => window.open(doc._url)} // Download
+                  className={styles.actionBtn}
+                >
                   <Download className={styles.icon} />
-                  </button>
-                  <button className={styles.actionBtn}>
-                    <Edit2 className={styles.icon} />
-                  </button>
-                  <button className={styles.actionBtn}>
-                    <Archive className={styles.icon} />
-                  </button>
+                </button>
+                <button 
+                  onClick={() => onEditDocument(doc)} // Edit
+                  className={styles.actionBtn}
+                >
+                  <Edit2 className={styles.icon} />
+                </button>
+                <button 
+                  onClick={() => onArchiveDocument(doc._id)} // Archive
+                  className={styles.actionBtn}
+                >
+                  <Archive className={styles.icon} />
+                </button>
                 </div>
               </td>
             </tr>

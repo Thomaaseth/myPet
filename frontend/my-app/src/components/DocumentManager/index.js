@@ -18,6 +18,7 @@ import DocumentList from './DocumentDisplay/DocumentList';
 import UploadPreview from './UploadPreview/UploadPreview';
 import SearchBar from './DocumentSearch/SearchBar';
 import TagFilter from './DocumentSearch/TagFilter';
+import TagInput from './TagInput/TagInput';
 import ViewToggle from './DocumentSearch/ViewToggle';
 import SortControls from './DocumentSearch/SortControls';
 import BatchOperations from './DocumentSearch/BatchOperations';
@@ -32,6 +33,8 @@ const DocumentManager = ({ petId, vetId }) => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [uploadQueue, setUploadQueue] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [editingDocument, setEditingDocument] = useState(null);
+
 
   useEffect(() => {
     if (petId) {
@@ -109,6 +112,11 @@ const suggestTags = (filename) => {
   };
 
 // Document operations
+
+const handleEditDocument = (doc) => {
+  setEditingDocument(doc);
+};
+
 const handleUpdateDocument = async (documentId, updates) => {
   try {
     await updateDocument(petId, documentId, updates);
@@ -258,6 +266,7 @@ const handleBatchArchive = async () => {
           selectedTags={selectedTags}
           selectedDocs={selectedDocs}
           onUpdateDocument={handleUpdateDocument}
+          onEditDocument={handleEditDocument}
           onArchiveDocument={handleArchiveDocument}
           onDeleteDocument={handleDeleteDocument}
           onSelectionChange={setSelectedDocs}
@@ -271,10 +280,39 @@ const handleBatchArchive = async () => {
           selectedTags={selectedTags}
           selectedDocs={selectedDocs}
           onSelectionChange={setSelectedDocs}
+          onEditDocument={handleEditDocument}
           onUpdateDocument={handleUpdateDocument}
           onArchiveDocument={handleArchiveDocument}
           onDeleteDocument={handleDeleteDocument}
         />
+      )}
+      
+      {editingDocument && (
+        <div className={styles.modal}>
+          <div className={styles.modalContent}>
+            <h2>Edit Document</h2>
+            <input
+              type="text"
+              value={editingDocument.name}
+              onChange={(e) => setEditingDocument({...editingDocument, name: e.target.value})}
+            />
+            <TagInput
+              value={editingDocument.tags}
+              onChange={(tags) => setEditingDocument({...editingDocument, tags})}
+              suggestions={SUGGESTED_TAGS}
+            />
+            <div className={styles.modalActions}>
+              <button onClick={() => {
+                handleUpdateDocument(editingDocument._id, {
+                  name: editingDocument.name,
+                  tags: editingDocument.tags
+                });
+                setEditingDocument(null);
+              }}>Save</button>
+              <button onClick={() => setEditingDocument(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

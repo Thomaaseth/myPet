@@ -1,10 +1,10 @@
-.search-bar {
+.searchBar {
     position: relative;
     flex: 1;
     max-width: 300px;
   }
   
-  .search-icon {
+  .searchIcon {
     position: absolute;
     left: 0.75rem;
     top: 50%;
@@ -14,7 +14,7 @@
     color: #64748b;
   }
   
-  .search-input {
+  .searchInput {
     width: 100%;
     padding: 0.5rem 0.75rem 0.5rem 2.25rem;
     border: 1px solid #e2e8f0;
