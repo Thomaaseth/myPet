@@ -152,6 +152,24 @@ const handleSearch = async () => {
   }
 };
 
+const sortDocuments = (docs, { field, order }) => {
+  return [...docs].sort((a, b) => {
+    let comparison;
+    switch (field) {
+      case 'name':
+        comparison = a.name.localeCompare(b.name);
+        break;
+      case 'size':
+        comparison = a.size - b.size;
+        break;
+      case 'uploadDate':
+      default:
+        comparison = new Date(a.uploadDate) - new Date(b.uploadDate);
+    }
+    return order === 'asc' ? comparison : -comparison;
+  });
+};
+
 // Batch operations
 const handleBatchTagUpdate = async (tags) => {
   try {
@@ -235,7 +253,7 @@ const handleBatchArchive = async () => {
         <DocumentGrid
           petId={petId}
           sortBy={sortBy}
-          documents={documents}
+          documents={sortDocuments(documents, sortBy)}
           searchQuery={searchQuery}
           selectedTags={selectedTags}
           selectedDocs={selectedDocs}
@@ -248,10 +266,14 @@ const handleBatchArchive = async () => {
         <DocumentList
           petId={petId}
           sortBy={sortBy}
+          documents={sortDocuments(documents, sortBy)}          
           searchQuery={searchQuery}
           selectedTags={selectedTags}
           selectedDocs={selectedDocs}
           onSelectionChange={setSelectedDocs}
+          onUpdateDocument={handleUpdateDocument}
+          onArchiveDocument={handleArchiveDocument}
+          onDeleteDocument={handleDeleteDocument}
         />
       )}
     </div>

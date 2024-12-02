@@ -3,15 +3,15 @@ import { ArrowUpDown } from 'lucide-react';
 import styles from './SortControls.module.css';
 
 const SortControls = ({ value, onChange }) => (
-  <div className="sort-controls">
-    <ArrowUpDown className="sort-icon" />
+  <div className={styles.sortControls}>
+    <ArrowUpDown className={styles.sortIcon} />
     <select
       value={`${value.field}-${value.order}`}
       onChange={(e) => {
         const [field, order] = e.target.value.split('-');
         onChange({ field, order });
       }}
-      className="sort-select"
+      className={styles.sortSelect}
     >
       <option value="uploadDate-desc">Newest First</option>
       <option value="uploadDate-asc">Oldest First</option>

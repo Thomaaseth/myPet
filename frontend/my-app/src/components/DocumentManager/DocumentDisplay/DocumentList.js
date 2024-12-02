@@ -4,9 +4,12 @@ import { formatDistanceToNow } from 'date-fns';
 import styles from './DocumentList.module.css';
 
 const DocumentList = ({ 
-  documents, 
-  selectedDocs, 
-  onSelectionChange 
+  documents = [], 
+  selectedDocs = [], 
+  onSelectionChange,
+  onUpdateDocument,
+  onArchiveDocument,
+  onDeleteDocument  
 }) => {
   return (
     <div className={styles.documentList}>
