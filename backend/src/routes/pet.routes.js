@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const FoodTracking = require('../models/FoodTracking.model');
 const Pet = require('../models/Pet.model');
 const { isAuthenticated } = require('../middleware/jwt.middleware');
 const multer = require('multer');
@@ -168,6 +169,87 @@ router.delete('/:id/weights/:weightId', isAuthenticated, async (req, res) => {
   }
 });
 
+router.get('/:id/food-tracking', isAuthenticated, async (req, res) => {
+  try {
+    const pet = await Pet.findOne({
+      _id: req.params.id,
+      user: req.user._id
+    });
+
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    const foodTracking = await FoodTracking.findOne({ pet: req.params.id });
+    
+    res.status(200).json({
+      message: 'Food tracking data retrieved successfully',
+      data: foodTracking
+    });
+  } catch (error) {
+    res.status(400).json({ message: 'Error fetching food tracking data', error: error.toString() });
+  }
+});
+
+// Create or update food tracking data
+router.post('/:id/food-tracking', isAuthenticated, async (req, res) => {
+  try {
+    const pet = await Pet.findOne({
+      _id: req.params.id,
+      user: req.user._id
+    });
+
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    const { type, totalWeight, dailyAmount } = req.body;
+
+    const foodTracking = await FoodTracking.findOneAndUpdate(
+      { pet: req.params.id },
+      {
+        type,
+        totalWeight,
+        dailyAmount,
+        lastUpdated: new Date()
+      },
+      { 
+        new: true,
+        upsert: true,
+        runValidators: true
+      }
+    );
+
+    res.status(200).json({
+      message: 'Food tracking data updated successfully',
+      data: foodTracking
+    });
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating food tracking data', error: error.toString() });
+  }
+});
+
+// Delete food tracking data
+router.delete('/:id/food-tracking', isAuthenticated, async (req, res) => {
+  try {
+    const pet = await Pet.findOne({
+      _id: req.params.id,
+      user: req.user._id
+    });
+
+    if (!pet) {
+      return res.status(404).json({ message: 'Pet not found' });
+    }
+
+    await FoodTracking.findOneAndDelete({ pet: req.params.id });
+
+    res.status(200).json({
+      message: 'Food tracking data deleted successfully'
+    });
+  } catch (error) {
+    res.status(400).json({ message: 'Error deleting food tracking data', error: error.toString() });
+  }
+});
 
 // Get a single pet
 router.get('/:id', isAuthenticated, async (req, res) => {
