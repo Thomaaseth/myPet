@@ -62,8 +62,25 @@
     min-width: 100px;
 }
 
-.weightTrackerContainer {
-    margin-top: 2rem;
+.trackersRow {
+    display: flex;
+    gap: 20px;
     width: 100%;
-    max-width: 500px;
-}
+    margin-top: 2rem;
+  }
+  
+  .trackerContainer {
+    flex: 1;
+    max-width: 50%;
+  }
+  
+  /* For mobile responsiveness */
+  @media (max-width: 768px) {
+    .trackersRow {
+      flex-direction: column;
+    }
+    
+    .trackerContainer {
+      max-width: 100%;
+    }
+  }

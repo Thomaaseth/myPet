@@ -4,6 +4,7 @@ import React from "react"
 import PetProfile from "@/components/PetManager/PetProfile"
 import WeightTracker from "@/components/PetManager/WeightTracker"
 import VetWidget from "@/components/PetManager/VetWidget"
+import FoodTracker from "@/components/PetManager/FoodTracker"
 import styles from './PetDetailsLayout.module.css'
 
 const PetDetailsLayout = ({
@@ -23,13 +24,20 @@ const PetDetailsLayout = ({
 
       <div className={styles.petContent}>
         <PetProfile pet={pet} />
-        <VetWidget pet={pet} />
-        <div className={styles.weightTrackerContainer}>
-        <WeightTracker 
-          petId={pet._id}
-          initialWeight={pet.weight}
-          />
+        <div className={styles.trackersRow}>
+          <div className={styles.trackerContainer}>
+            <WeightTracker 
+              petId={pet._id}
+              initialWeight={pet.weight}
+            />
+          </div>
+          <div className={styles.trackerContainer}>
+            <FoodTracker 
+              petId={pet._id}
+            />
+          </div>
         </div>
+        <VetWidget pet={pet} />
       </div>
     </div>
   );

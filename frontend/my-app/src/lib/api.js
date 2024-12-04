@@ -257,6 +257,36 @@ export const updatePetWeight = async (petId, weightId, weightData) => {
     }
 };
 
+export const getFoodTracking = async (petId) => {
+    try {
+        const response = await api.get(`/api/pets/${petId}/food-tracking`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching food tracking:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const createOrUpdateFoodTracking = async (petId, foodData) => {
+    try {
+        const response = await api.post(`/api/pets/${petId}/food-tracking`, foodData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating food tracking:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
+export const deleteFoodTracking = async (petId) => {
+    try {
+        const response = await api.delete(`/api/pets/${petId}/food-tracking`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting food tracking:', error.response || error);
+        throw error.response ? error.response.data : error;
+    }
+};
+
 // Vet operations
 
 export const getVets = async (petId) => {
@@ -316,7 +346,7 @@ export const unlinkVet = async (petId, vetId) => {
 
 // Vet visit operations
 
-// Get operations
+// Get past visits
 export const getVetPastVisits = async (petId, vetId) => {
     try {
         const response = await api.get(`/api/pets/${petId}/vets/${vetId}/past-visits`);
