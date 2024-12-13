@@ -203,7 +203,13 @@ router.post('/:id/food-tracking', isAuthenticated, async (req, res) => {
       return res.status(404).json({ message: 'Pet not found' });
     }
 
-    const { type, totalWeight, dailyAmount } = req.body;
+    const { type, totalWeight, dailyAmount, dateBought } = req.body;
+
+    // Validate dateBought
+    const boughtDate = new Date(dateBought);
+    if (isNaN(boughtDate) || boughtDate > new Date()) {
+      return res.status(400).json({ message: 'Invalid date or date is in the future' });
+    }
 
     const foodTracking = await FoodTracking.findOneAndUpdate(
       { pet: req.params.id },
@@ -211,6 +217,7 @@ router.post('/:id/food-tracking', isAuthenticated, async (req, res) => {
         type,
         totalWeight,
         dailyAmount,
+        dateBought: boughtDate,
         lastUpdated: new Date()
       },
       { 

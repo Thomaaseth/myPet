@@ -27,14 +27,16 @@ const FoodTracker = ({ petId }) => {
         setFormData({
           type: response.data.type,
           totalWeight: response.data.totalWeight,
-          dailyAmount: response.data.dailyAmount
+          dailyAmount: response.data.dailyAmount,
+          dateBought: response.data.dateBought.split('T')[0]
         });
       } else {
         // Set default values if no existing data
         setFormData({
           type: 'dry',
           totalWeight: '',
-          dailyAmount: ''
+          dailyAmount: '',
+          dateBought: new Date().toISOString().split('T')[0]
         });
         setIsEditing(true);
       }
@@ -55,7 +57,8 @@ const FoodTracker = ({ petId }) => {
         : foodData.totalWeight.toString(),
       dailyAmount: activeUnit === 'kg'
         ? (foodData.dailyAmount / 1000).toString()
-        : foodData.dailyAmount.toString()
+        : foodData.dailyAmount.toString(),
+        dateBought: foodData.dateBought.split('T')[0]
     });
     setIsEditing(true);
   };
@@ -67,7 +70,8 @@ const FoodTracker = ({ petId }) => {
       const dataToSubmit = {
         type: formData.type,
         totalWeight: parseFloat(formData.totalWeight) * conversionFactor,
-        dailyAmount: parseFloat(formData.dailyAmount) * conversionFactor
+        dailyAmount: parseFloat(formData.dailyAmount) * conversionFactor,
+        dateBought: formData.dateBought
       };
 
       const response = await createOrUpdateFoodTracking(petId, dataToSubmit);
@@ -89,13 +93,15 @@ const FoodTracker = ({ petId }) => {
           : foodData.totalWeight.toString(),
         dailyAmount: activeUnit === 'kg'
           ? (foodData.dailyAmount / 1000).toString()
-          : foodData.dailyAmount.toString()
+          : foodData.dailyAmount.toString(),
+          dateBought: foodData.dateBought.split('T')[0]
       });
     } else {
       setFormData({
         type: 'dry',
         totalWeight: '',
-        dailyAmount: ''
+        dailyAmount: '',
+        dateBought: new Date().toISOString().split('T')[0]
       });
     }
     setIsEditing(false);
@@ -109,7 +115,8 @@ const FoodTracker = ({ petId }) => {
       setFormData({
         type: 'dry',
         totalWeight: '',
-        dailyAmount: ''
+        dailyAmount: '',
+        dateBought: new Date().toISOString().split('T')[0]
       });
       setIsEditing(true);
     } catch (error) {
@@ -119,7 +126,12 @@ const FoodTracker = ({ petId }) => {
 
   const calculateRemainingDays = () => {
     if (!foodData) return null;
-    return Math.floor(foodData.totalWeight / foodData.dailyAmount);
+    const today = new Date();
+    const boughtDate = new Date(foodData.dateBought);
+    const daysUsed = Math.floor((today - boughtDate) / (1000 * 60 * 60 * 24));
+    const totalFoodUsed = daysUsed * foodData.dailyAmount;
+    const remainingFood = foodData.totalWeight - totalFoodUsed;
+    return Math.max(0, Math.floor(remainingFood / foodData.dailyAmount));
   };
 
   const calculateDepletionDate = () => {
@@ -189,7 +201,16 @@ const FoodTracker = ({ petId }) => {
                 <option value="moist">Moist Food</option>
               </select>
             </div>
-
+            <div>
+              <label>Date Bought</label>
+              <input
+                type="date"
+                value={formData.dateBought}
+                max={new Date().toISOString().split('T')[0]}
+                onChange={(e) => setFormData({...formData, dateBought: e.target.value})}
+                required
+              />
+            </div>
             <div>
               <label>Total Weight ({activeUnit})</label>
               <input
@@ -237,6 +258,10 @@ const FoodTracker = ({ petId }) => {
                     ? convertValue(foodData.totalWeight, true)
                     : convertValue(foodData.totalWeight)} {activeUnit}
                 </span>
+              </div>
+              <div>
+                <span>Date Bought:</span>
+                <span>{new Date(foodData.dateBought).toLocaleDateString()}</span>
               </div>
               <div>
                 <span>Daily Amount:</span>

@@ -257,6 +257,7 @@ export const updatePetWeight = async (petId, weightId, weightData) => {
     }
 };
 
+// Food tracking operations
 export const getFoodTracking = async (petId) => {
     try {
         const response = await api.get(`/api/pets/${petId}/food-tracking`);
@@ -269,7 +270,13 @@ export const getFoodTracking = async (petId) => {
 
 export const createOrUpdateFoodTracking = async (petId, foodData) => {
     try {
-        const response = await api.post(`/api/pets/${petId}/food-tracking`, foodData);
+        // Ensure date is in correct format
+        const formattedData = {
+            ...foodData,
+            dateBought: new Date(foodData.dateBought).toISOString().split('T')[0]
+        };
+
+        const response = await api.post(`/api/pets/${petId}/food-tracking`, formattedData);
         return response.data;
     } catch (error) {
         console.error('Error updating food tracking:', error.response || error);
