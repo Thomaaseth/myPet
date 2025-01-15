@@ -11,7 +11,7 @@ import AddVetForm from '@/components/VetManager/VetForms/addVetForm';
 import VetSuggestions from '@/components/VetManager/VetSuggestions';
 import VetsQuickManager from '@/components/VetManager/VetQuickManager';
 import VetDetailsLayout from '@/components/layouts/VetDetailsLayout';
-import styles from './Vets.module.css';
+import styles from './page.module.css';
 
 const MyVets = () => {
     const router = useRouter();

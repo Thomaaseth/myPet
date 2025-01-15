@@ -6,7 +6,7 @@ import PetDetailsLayout from '@/components/layouts/PetDetailsLayout';
 import PetTabs from "@/components/PetManager/PetTabs";
 import AddPetForm from "@/components/PetManager/PetForms/addPetForm";
 import { toast } from "react-toastify";
-import styles from './Pets.module.css'
+import styles from './page.module.css'
 import { TOAST_MESSAGES } from "@/utils/toastMessage";
 
 const MyPets = () => {

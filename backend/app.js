@@ -31,9 +31,10 @@ const documentRoutes = require('./src/routes/doc.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/pets', petRoutes);
-app.use('/api', documentRoutes);
-
+app.use('/api/', documentRoutes);
 app.use('/api/', vetRoutes);
+
+
 
 // Error handling
 require('./error-handling/error.handling')(app);

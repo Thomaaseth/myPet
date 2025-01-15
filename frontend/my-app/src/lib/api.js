@@ -638,14 +638,11 @@ export const updateDocumentTags = async (petId, documentId, tags) => {
 };
 
 // Batch operations
-export const batchUpdateDocuments = async (petId, documentIds, updates) => {
+export const batchUpdateDocuments = async (petId, { updates }) => {
     try {
         const response = await api.put(
-            `/api/pets/${petId}/documents/batch`,
-            {
-                documentIds,
-                updates
-            }
+            `/api/pets/${petId}/documents/update`,
+            { updates }
         );
         return response.data;
     } catch (error) {
@@ -657,7 +654,7 @@ export const batchUpdateDocuments = async (petId, documentIds, updates) => {
 export const batchArchiveDocuments = async (petId, documentIds) => {
     try {
         const response = await api.put(
-            `/api/pets/${petId}/documents/batch/archive`,
+            `/api/pets/${petId}/documents/batch-archive`,
             { documentIds }
         );
         return response.data;

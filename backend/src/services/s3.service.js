@@ -38,7 +38,7 @@ class S3Service {
       });
 
       const uploadUrl = await getSignedUrl(this.client, command, {
-        expiresIn: 600 // URL expires in 10 minutes
+        expiresIn: 600
       });
       
       return {

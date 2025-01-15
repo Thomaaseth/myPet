@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { login } from '@/lib/api';
 import { toast } from 'react-toastify';
 import { TOAST_MESSAGES } from '@/utils/toastMessage';
-import styles from './Login.module.css'
+import styles from './page.module.css'
 
 export default function Login() {
 

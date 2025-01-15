@@ -6,7 +6,7 @@ import AuthForm from '@/components/AuthForms';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'react-toastify';
 import { TOAST_MESSAGES } from '@/utils/toastMessage';
-import styles from './Signup.module.css'
+import styles from './page.module.css'
 
 export default function Signup() {
     const [error, setError] = useState('');

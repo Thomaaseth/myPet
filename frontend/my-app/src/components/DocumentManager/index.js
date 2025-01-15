@@ -22,6 +22,7 @@ import TagInput from './TagInput/TagInput';
 import ViewToggle from './DocumentSearch/ViewToggle';
 import SortControls from './DocumentSearch/SortControls';
 import BatchOperations from './DocumentSearch/BatchOperations';
+import BatchTagModal from './BatchTagModal/BatchTagModal';
 import styles from './DocumentManager.module.css';
 
 const DocumentManager = ({ petId, vetId }) => {
@@ -34,6 +35,9 @@ const DocumentManager = ({ petId, vetId }) => {
   const [uploadQueue, setUploadQueue] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [editingDocument, setEditingDocument] = useState(null);
+  const [showBatchTagModal, setShowBatchTagModal] = useState(false);
+  const [selectedDocuments, setSelectedDocuments] = useState([]);
+
 
 
   useEffect(() => {
@@ -113,6 +117,12 @@ const suggestTags = (filename) => {
 
 // Document operations
 
+const handleSelectionChange = (docIds) => {
+  const fullDocs = documents.filter(doc => docIds.includes(doc._id));
+  setSelectedDocuments(fullDocs);
+  setSelectedDocs(docIds);
+};
+
 const handleEditDocument = (doc) => {
   setEditingDocument(doc);
 };
@@ -179,15 +189,29 @@ const sortDocuments = (docs, { field, order }) => {
 };
 
 // Batch operations
-const handleBatchTagUpdate = async (tags) => {
+const handleBatchTagUpdate = async (newTags) => {
   try {
-    await batchUpdateDocuments(petId, selectedDocs, { tags });
+    setIsUploading(true);
+    
+    // Create updates array, preserving existing tags unless removed
+    const updates = selectedDocuments.map(doc => ({
+      documentId: doc._id,
+      tags: newTags // The newTags already include both preserved and new tags
+    }));
+
+    await batchUpdateDocuments(petId, { updates });
+    
     setSelectedDocs([]);
-    fetchDocuments();
+    setSelectedDocuments([]);
+    await fetchDocuments();
+    setShowBatchTagModal(false);
   } catch (error) {
     console.error('Error updating document tags:', error);
+  } finally {
+    setIsUploading(false);
   }
 };
+
 
 const handleBatchArchive = async () => {
   try {
@@ -214,8 +238,19 @@ const handleBatchArchive = async () => {
       {selectedDocs.length > 0 && (
       <BatchOperations
         selectedCount={selectedDocs.length}
-        onTagUpdate={handleBatchTagUpdate}
+        onTagUpdate={() => setShowBatchTagModal(true)}
         onArchive={handleBatchArchive}
+      />
+      )}
+
+      {showBatchTagModal && (
+      <BatchTagModal
+        isOpen={showBatchTagModal}
+        onClose={() => setShowBatchTagModal(false)}
+        onUpdateTags={handleBatchTagUpdate}
+        selectedCount={selectedDocs.length}
+        documents={selectedDocuments}
+        suggestions={SUGGESTED_TAGS}
       />
       )}
 
@@ -269,8 +304,8 @@ const handleBatchArchive = async () => {
           onEditDocument={handleEditDocument}
           onArchiveDocument={handleArchiveDocument}
           onDeleteDocument={handleDeleteDocument}
-          onSelectionChange={setSelectedDocs}
-        />
+          onSelectionChange={handleSelectionChange}
+          />
       ) : (
         <DocumentList
           petId={petId}
@@ -279,7 +314,7 @@ const handleBatchArchive = async () => {
           searchQuery={searchQuery}
           selectedTags={selectedTags}
           selectedDocs={selectedDocs}
-          onSelectionChange={setSelectedDocs}
+          onSelectionChange={handleSelectionChange}
           onEditDocument={handleEditDocument}
           onUpdateDocument={handleUpdateDocument}
           onArchiveDocument={handleArchiveDocument}

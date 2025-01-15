@@ -173,53 +173,73 @@ router.get('/pets/:petId/documents/:documentId', isAuthenticated, async (req, re
   }
 });
 
-// Update document metadata for a pet
-router.put('/pets/:petId/documents/:documentId', isAuthenticated, async (req, res) => {
+// Update document(s) metadata for a pet
+router.put('/pets/:petId/documents/update', isAuthenticated, async (req, res) => {
   try {
-    const { petId, documentId } = req.params;
-    const { name, tags, originalVet } = req.body;
-    
+    const { petId } = req.params;
+    const { updates } = req.body;  // Array of { documentId, tags, name, originalVet }
+
+    // Validate inputs
+    if (!updates || !Array.isArray(updates) || updates.length === 0) {
+      return res.status(400).json({ message: 'No updates specified' });
+    }
+
     // Verify pet belongs to user
     const pet = await Pet.findOne({ _id: petId, user: req.user._id });
     if (!pet) {
       return res.status(404).json({ message: 'Pet not found' });
     }
 
-    const document = await Document.findOne({
-      _id: documentId,
-      pet: petId
-    });
-    
-    if (!document) {
-      return res.status(404).json({ message: 'Document not found' });
+    // Process each update
+    const updatedDocuments = await Promise.all(
+      updates.map(async (updateItem) => {
+        const { documentId, ...updateData } = updateItem;
+
+        // Skip if no documentId
+        if (!documentId) {
+          return null;
+        }
+
+        // Validate name if provided
+        if (updateData.name !== undefined && !updateData.name.trim()) {
+          return null;
+        }
+
+        // Find and update document
+        const document = await Document.findOneAndUpdate(
+          {
+            _id: documentId,
+            pet: petId
+          },
+          updateData,
+          { new: true }
+        ).populate('originalVet', 'clinicName vetName');
+
+        if (document) {
+          // Generate presigned URL
+          document._url = await s3Service.getViewUrl(document.s3Key);
+        }
+
+        return document;
+      })
+    );
+
+    // Filter out null results (documents that weren't found)
+    const successfulUpdates = updatedDocuments.filter(doc => doc !== null);
+
+    if (successfulUpdates.length === 0) {
+      return res.status(404).json({ message: 'No valid documents found for update' });
     }
-
-    if (name !== undefined && !name.trim()) {
-      return res.status(400).json({ message: 'Document name cannot be empty' });
-    }
-
-    // Update fields
-    const updates = {};
-    if (name) updates.name = name;
-    if (tags) updates.tags = tags;
-    if (originalVet) updates.originalVet = originalVet;
-
-    const updatedDocument = await Document.findByIdAndUpdate(
-      documentId,
-      updates,
-      { new: true }
-    ).populate('originalVet', 'clinicName vetName');
-
-    // Generate presigned URL
-    updatedDocument._url = await s3Service.getViewUrl(updatedDocument.s3Key);
 
     res.json({
-      message: 'Document updated successfully',
-      document: updatedDocument
+      message: `Successfully updated ${successfulUpdates.length} document(s)`,
+      documents: successfulUpdates,
+      count: successfulUpdates.length
     });
+
   } catch (error) {
-    console.error('Error updating document:', error);
-    res.status(500).json({ message: 'Error updating document' });
+    console.error('Error updating document(s):', error);
+    res.status(500).json({ message: 'Error updating document(s)' });
   }
 });
 

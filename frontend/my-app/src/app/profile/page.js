@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { updateEmail, changePassword, deleteAccount } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import styles from './Profile.module.css';
+import styles from './page.module.css';
 import { TOAST_MESSAGES } from '@/utils/toastMessage';
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 
