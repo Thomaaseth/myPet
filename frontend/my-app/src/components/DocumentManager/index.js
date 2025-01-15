@@ -23,6 +23,7 @@ import ViewToggle from './DocumentSearch/ViewToggle';
 import SortControls from './DocumentSearch/SortControls';
 import BatchOperations from './DocumentSearch/BatchOperations';
 import BatchTagModal from './BatchTagModal/BatchTagModal';
+import StatusToggle from './DocumentSearch/StatusToggle';
 import styles from './DocumentManager.module.css';
 
 const DocumentManager = ({ petId, vetId }) => {
@@ -37,18 +38,12 @@ const DocumentManager = ({ petId, vetId }) => {
   const [editingDocument, setEditingDocument] = useState(null);
   const [showBatchTagModal, setShowBatchTagModal] = useState(false);
   const [selectedDocuments, setSelectedDocuments] = useState([]);
+  const [documentStatus, setDocumentStatus] = useState('ACTIVE');
 
-
-
-  useEffect(() => {
-    if (petId) {
-      fetchDocuments();
-    }
-  }, [petId]);
 
   const fetchDocuments = async () => {
     try {
-      const response = await getDocuments(petId);
+      const response = await getDocuments(petId, { status: documentStatus });
       console.log('Documents response:', response);
 
       setDocuments(response.documents || []);
@@ -56,6 +51,12 @@ const DocumentManager = ({ petId, vetId }) => {
       console.error('Error fetching documents:', error);
     }
   };
+
+  useEffect(() => {
+    if (petId) {
+      fetchDocuments();
+    }
+  }, [petId, documentStatus]);
 
   useEffect(() => {
     if (petId) {
@@ -273,10 +274,21 @@ const handleBatchArchive = async () => {
       )}
 
       <div className={styles.controls}>
-        <SearchBar value={searchQuery} onChange={setSearchQuery} />
-        <TagFilter selectedTags={selectedTags} onChange={setSelectedTags} />
-        <ViewToggle value={viewMode} onChange={setViewMode} />
-        <SortControls value={sortBy} onChange={setSortBy} />
+        <div className={styles.leftControls}>
+          <StatusToggle 
+            value={documentStatus} 
+            onChange={(status) => {
+              setDocumentStatus(status);
+              setSelectedDocs([]); // Clear selection when switching views
+            }} 
+          />
+        </div>
+        <div className={styles.rightControls}>
+          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          <TagFilter selectedTags={selectedTags} onChange={setSelectedTags} />
+          <ViewToggle value={viewMode} onChange={setViewMode} />
+          <SortControls value={sortBy} onChange={setSortBy} />
+        </div>
       </div>
 
       {selectedDocs.length > 0 && (

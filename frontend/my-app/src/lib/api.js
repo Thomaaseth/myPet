@@ -511,11 +511,13 @@ export const deleteNextAppointment = async (petId, vetId, appointmentId) => {
 
 // Documents operations
 
-export const getDocuments = async (petId) => {
+export const getDocuments = async (petId, options = {}) => {
     try {
         const response = await api.get(`/api/pets/${petId}/documents`, {
             params: {
-                status: 'ACTIVE' // Default to active documents
+                status: options.status || 'ACTIVE',
+                search: options.search,
+                tags: options.tags?.join(',')
             }
         });
         return response.data;

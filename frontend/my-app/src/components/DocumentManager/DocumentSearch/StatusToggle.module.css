@@ -1,0 +1,35 @@
+.toggleContainer {
+    display: flex;
+    gap: 8px;
+    background-color: #f3f4f6;
+    padding: 4px;
+    border-radius: 8px;
+  }
+  
+  .toggleButton {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .toggleButton:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .toggleButton.active {
+    background-color: white;
+    color: #2563eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
