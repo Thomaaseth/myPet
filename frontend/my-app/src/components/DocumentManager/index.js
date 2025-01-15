@@ -189,16 +189,11 @@ const sortDocuments = (docs, { field, order }) => {
 };
 
 // Batch operations
-const handleBatchTagUpdate = async (newTags) => {
+const handleBatchTagUpdate = async (updates) => {
   try {
     setIsUploading(true);
     
-    // Create updates array, preserving existing tags unless removed
-    const updates = selectedDocuments.map(doc => ({
-      documentId: doc._id,
-      tags: newTags // The newTags already include both preserved and new tags
-    }));
-
+    // updates is already in the correct format now
     await batchUpdateDocuments(petId, { updates });
     
     setSelectedDocs([]);

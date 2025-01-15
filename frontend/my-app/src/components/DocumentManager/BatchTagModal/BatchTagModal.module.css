@@ -16,8 +16,11 @@
     border-radius: 8px;
     padding: 24px;
     width: 100%;
-    max-width: 500px;
+    max-width: 800px;
+    max-height: 90vh;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
   }
   
   .modalHeader {
@@ -47,18 +50,50 @@
   
   .modalBody {
     margin-bottom: 24px;
+    overflow-y: auto;
+    flex-grow: 1;
   }
   
   .modalDescription {
     font-size: 0.875rem;
     color: #666;
-    margin-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .documentsList {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .documentItem {
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background-color: #f9fafb;
+  }
+  
+  .documentInfo {
+    margin-bottom: 12px;
+  }
+  
+  .documentName {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 4px 0;
+  }
+  
+  .originalName {
+    font-size: 0.875rem;
+    color: #666;
   }
   
   .modalActions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
   }
   
   .cancelButton {
