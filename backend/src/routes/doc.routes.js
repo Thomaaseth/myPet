@@ -177,7 +177,7 @@ router.get('/pets/:petId/documents/:documentId', isAuthenticated, async (req, re
 router.put('/pets/:petId/documents/update', isAuthenticated, async (req, res) => {
   try {
     const { petId } = req.params;
-    const { updates } = req.body;  // Array of { documentId, tags, name, originalVet }
+    const { updates } = req.body;
 
     // Validate inputs
     if (!updates || !Array.isArray(updates) || updates.length === 0) {
@@ -194,6 +194,8 @@ router.put('/pets/:petId/documents/update', isAuthenticated, async (req, res) =>
     const updatedDocuments = await Promise.all(
       updates.map(async (updateItem) => {
         const { documentId, ...updateData } = updateItem;
+        console.log('Processing update for document:', documentId);
+        console.log('Update data:', JSON.stringify(updateData, null, 2));
 
         // Skip if no documentId
         if (!documentId) {
@@ -205,18 +207,41 @@ router.put('/pets/:petId/documents/update', isAuthenticated, async (req, res) =>
           return null;
         }
 
+        // Create a clean update object with only valid fields
+        const cleanUpdate = {};
+
+        // Handle tags specifically
+        if (Array.isArray(updateData.tags)) {
+          // Extract just the tag strings, ignore any nested objects
+          const cleanTags = updateData.tags
+            .filter(tag => typeof tag === 'string')
+            .map(tag => String(tag));
+          
+          if (cleanTags.length > 0) {
+            if (!cleanUpdate.$set) cleanUpdate.$set = {};
+            cleanUpdate.$set.tags = cleanTags;
+          }
+        }
+        
+        // Skip update if no valid fields to update
+        if (Object.keys(cleanUpdate).length === 0) {
+          return null;
+        }
+
         // Find and update document
         const document = await Document.findOneAndUpdate(
           {
             _id: documentId,
             pet: petId
           },
-          updateData,
-          { new: true }
+          cleanUpdate,
+          { 
+            new: true,
+            runValidators: true
+          }
         ).populate('originalVet', 'clinicName vetName');
 
         if (document) {
-          // Generate presigned URL
           document._url = await s3Service.getViewUrl(document.s3Key);
         }
 
@@ -224,7 +249,7 @@ router.put('/pets/:petId/documents/update', isAuthenticated, async (req, res) =>
       })
     );
 
-    // Filter out null results (documents that weren't found)
+    // Filter out null results (documents that weren't found or had invalid updates)
     const successfulUpdates = updatedDocuments.filter(doc => doc !== null);
 
     if (successfulUpdates.length === 0) {
@@ -243,12 +268,16 @@ router.put('/pets/:petId/documents/update', isAuthenticated, async (req, res) =>
   }
 });
 
-// Archive document for a pet
-router.put('/pets/:petId/documents/:documentId/archive', isAuthenticated, async (req, res) => {
+// Archive/restore document for a pet
+router.put('/pets/:petId/documents/:documentId/status', isAuthenticated, async (req, res) => {
   try {
     const { petId, documentId } = req.params;
+    const { status } = req.body; // Accept the new status in the request body
 
-    // Verify pet belongs to user
+    if (!['ACTIVE', 'ARCHIVED'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status' });
+    }
+
     const pet = await Pet.findOne({ _id: petId, user: req.user._id });
     if (!pet) {
       return res.status(404).json({ message: 'Pet not found' });
@@ -263,16 +292,16 @@ router.put('/pets/:petId/documents/:documentId/archive', isAuthenticated, async 
       return res.status(404).json({ message: 'Document not found' });
     }
 
-    document.status = 'ARCHIVED';
+    document.status = status;
     await document.save();
 
     res.json({
-      message: 'Document archived successfully',
+      message: `Document ${status === 'ARCHIVED' ? 'archived' : 'restored'} successfully`,
       documentId: document._id
     });
   } catch (error) {
-    console.error('Error archiving document:', error);
-    res.status(500).json({ message: 'Error archiving document' });
+    console.error('Error updating document status:', error);
+    res.status(500).json({ message: 'Error updating document status' });
   }
 });
 

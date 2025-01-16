@@ -573,27 +573,16 @@ export const createDocument = async (petId, documentData) => {
     }
 };
 
-export const updateDocument = async (petId, documentId, updates) => {
-    try {
-        const response = await api.put(
-            `/api/pets/${petId}/documents/${documentId}`,
-            updates
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error updating document:', error.response || error);
-        throw error.response ? error.response.data : error;
-    }
-};
 
-export const archiveDocument = async (petId, documentId) => {
+export const updateDocumentStatus = async (petId, documentId, status) => {
     try {
         const response = await api.put(
-            `/api/pets/${petId}/documents/${documentId}/archive`
+            `/api/pets/${petId}/documents/${documentId}/status`,
+            { status }
         );
         return response.data;
     } catch (error) {
-        console.error('Error archiving document:', error.response || error);
+        console.error('Error updating document status:', error.response || error);
         throw error.response ? error.response.data : error;
     }
 };
@@ -626,18 +615,6 @@ export const searchDocuments = async (petId, params) => {
     }
 };
 
-export const updateDocumentTags = async (petId, documentId, tags) => {
-    try {
-        const response = await api.put(
-            `/api/pets/${petId}/documents/${documentId}`,
-            { tags }
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error updating document tags:', error.response || error);
-        throw error.response ? error.response.data : error;
-    }
-};
 
 // Batch operations
 export const batchUpdateDocuments = async (petId, { updates }) => {
@@ -653,15 +630,3 @@ export const batchUpdateDocuments = async (petId, { updates }) => {
     }
 };
 
-export const batchArchiveDocuments = async (petId, documentIds) => {
-    try {
-        const response = await api.put(
-            `/api/pets/${petId}/documents/batch-archive`,
-            { documentIds }
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error performing batch archive:', error.response || error);
-        throw error.response ? error.response.data : error;
-    }
-};

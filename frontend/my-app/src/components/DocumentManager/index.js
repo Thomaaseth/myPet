@@ -5,12 +5,9 @@ import { useDropzone } from 'react-dropzone';
 import {
   getDocuments,
   createDocument,
-  updateDocument,
-  archiveDocument,
   deleteDocument,
   searchDocuments,
-  batchUpdateDocuments,
-  batchArchiveDocuments
+  batchUpdateDocuments
 } from '@/lib/api';
 import { SUGGESTED_TAGS } from '../../../src/constants/suggestedTags';
 import DocumentGrid from './DocumentDisplay/DocumentGrid';
@@ -128,21 +125,40 @@ const handleEditDocument = (doc) => {
   setEditingDocument(doc);
 };
 
-const handleUpdateDocument = async (documentId, updates) => {
-  try {
-    await updateDocument(petId, documentId, updates);
-    fetchDocuments(); // Refresh list
-  } catch (error) {
-    console.error('Error updating document:', error);
-  }
-};
 
-const handleArchiveDocument = async (documentId) => {
+const handleDocumentUpdate = async (documentIds, updates, options = {}) => {
   try {
-    await archiveDocument(petId, documentId);
-    fetchDocuments();
+    setIsUploading(options.showLoading ?? true);
+    
+    // Convert single ID to array if needed
+    const ids = Array.isArray(documentIds) ? documentIds : [documentIds];
+    
+    // Prepare updates array
+    const updatesArray = ids.map(docId => ({
+      documentId: docId,
+      ...updates
+    }));
+
+    console.log('Sending to backend:', { updates: updatesArray });  // Add this log
+
+    await batchUpdateDocuments(petId, { updates: updatesArray });
+    
+    // Clear selection if it's a batch operation
+    if (ids.length > 1) {
+      setSelectedDocs([]);
+      setSelectedDocuments([]);
+    }
+
+    await fetchDocuments();
+
+    // Close modal if updating tags
+    if (updates.tags) {
+      setShowBatchTagModal(false);
+    }
   } catch (error) {
-    console.error('Error archiving document:', error);
+    console.error('Error updating documents:', error);
+  } finally {
+    setIsUploading(false);
   }
 };
 
@@ -189,12 +205,23 @@ const sortDocuments = (docs, { field, order }) => {
   });
 };
 
-// Batch operations
+// const handleUpdateDocument = async (documentId, updates) => {
+//   await handleDocumentUpdate(documentId, updates, { showLoading: false });
+// };
+
+// const handleArchiveDocument = async (documentId) => {
+//   await handleDocumentUpdate(
+//     documentId, 
+//     { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' },
+//     { showLoading: false }
+//   );
+// };
+
 const handleBatchTagUpdate = async (updates) => {
   try {
     setIsUploading(true);
-    
-    // updates is already in the correct format now
+        
+    // Pass updates directly to batchUpdateDocuments
     await batchUpdateDocuments(petId, { updates });
     
     setSelectedDocs([]);
@@ -208,16 +235,14 @@ const handleBatchTagUpdate = async (updates) => {
   }
 };
 
-
 const handleBatchArchive = async () => {
-  try {
-    await batchArchiveDocuments(petId, selectedDocs);
-    setSelectedDocs([]);
-    fetchDocuments();
-  } catch (error) {
-    console.error('Error archiving documents:', error);
-  }
+  await handleDocumentUpdate(
+    selectedDocs, 
+    { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' },
+    { showLoading: false }
+  );
 };
+
 
 
 
@@ -294,8 +319,13 @@ const handleBatchArchive = async () => {
       {selectedDocs.length > 0 && (
         <BatchOperations
           selectedCount={selectedDocs.length}
-          onTagUpdate={(tags) => {/* Handle batch tag update */}}
-          onArchive={() => {/* Handle batch archive */}}
+          onTagUpdate={() => setShowBatchTagModal(true)}
+          onArchive={() => handleDocumentUpdate(
+            selectedDocs, 
+            { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' },
+            { showLoading: false }
+          )}
+          documentStatus={documentStatus}
         />
       )}
 
@@ -307,12 +337,16 @@ const handleBatchArchive = async () => {
           searchQuery={searchQuery}
           selectedTags={selectedTags}
           selectedDocs={selectedDocs}
-          onUpdateDocument={handleUpdateDocument}
+          onUpdateDocument={(docId, updates) => handleDocumentUpdate(docId, updates, { showLoading: false })}
           onEditDocument={handleEditDocument}
-          onArchiveDocument={handleArchiveDocument}
+          onArchiveDocument={(docId) => handleDocumentUpdate(
+            docId, 
+            { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' }, 
+            { showLoading: false }
+          )}
           onDeleteDocument={handleDeleteDocument}
           onSelectionChange={handleSelectionChange}
-          />
+        />
       ) : (
         <DocumentList
           petId={petId}
@@ -323,8 +357,12 @@ const handleBatchArchive = async () => {
           selectedDocs={selectedDocs}
           onSelectionChange={handleSelectionChange}
           onEditDocument={handleEditDocument}
-          onUpdateDocument={handleUpdateDocument}
-          onArchiveDocument={handleArchiveDocument}
+          onUpdateDocument={(docId, updates) => handleDocumentUpdate(docId, updates, { showLoading: false })}
+          onArchiveDocument={(docId) => handleDocumentUpdate(
+            docId, 
+            { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' }, 
+            { showLoading: false }
+          )}
           onDeleteDocument={handleDeleteDocument}
         />
       )}
@@ -344,13 +382,22 @@ const handleBatchArchive = async () => {
               suggestions={SUGGESTED_TAGS}
             />
             <div className={styles.modalActions}>
-              <button onClick={() => {
-                handleUpdateDocument(editingDocument._id, {
+            <button onClick={() => {
+              console.log('Sending update:', {
+                documentId: editingDocument._id,
+                name: editingDocument.name,
+                tags: editingDocument.tags
+              });
+              handleDocumentUpdate(
+                editingDocument._id,
+                {
                   name: editingDocument.name,
                   tags: editingDocument.tags
-                });
-                setEditingDocument(null);
-              }}>Save</button>
+                },
+                { showLoading: false }
+              );
+              setEditingDocument(null);
+            }}>Save</button>
               <button onClick={() => setEditingDocument(null)}>Cancel</button>
             </div>
           </div>

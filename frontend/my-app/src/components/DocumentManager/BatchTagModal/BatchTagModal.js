@@ -26,12 +26,15 @@ const BatchTagModal = ({
     };
   
     const handleSubmit = () => {
+
       // Convert documentTags object to array format expected by the API
       const updates = Object.entries(documentTags).map(([docId, tags]) => ({
         documentId: docId,
-        tags
+        tags: tags
       }));
+
       onUpdateTags(updates);
+      onClose();
     };
   
     if (!isOpen) return null;
