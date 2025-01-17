@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileIcon, CheckCircle, Download, Edit2, Archive } from 'lucide-react';
+import { FileIcon, CheckCircle, Download, Edit2, Archive, Undo } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import styles from './DocumentList.module.css';
 
@@ -10,7 +10,8 @@ const DocumentList = ({
   onEditDocument,
   onUpdateDocument,
   onArchiveDocument,
-  onDeleteDocument  
+  onDeleteDocument,
+  documentStatus        
 }) => {
   return (
     <div className={styles.documentList}>
@@ -35,7 +36,8 @@ const DocumentList = ({
         </thead>
         <tbody>
           {documents.map(doc => (
-            <tr key={doc._id} className={selectedDocs.includes(doc._id) ? styles.selected : ''}>              <td>
+            <tr key={doc._id} className={selectedDocs.includes(doc._id) ? styles.selected : ''}>
+              <td>
                 <input 
                   type="checkbox"
                   checked={selectedDocs.includes(doc._id)}
@@ -49,7 +51,7 @@ const DocumentList = ({
                 />
               </td>
               <td className={styles.nameCell}>
-              <div className={styles.fileInfo}>
+                <div className={styles.fileInfo}>
                   {doc.mimeType.startsWith('image/') ? (
                     <img src={doc._url} alt={doc.name} className={styles.preview} />
                   ) : (
@@ -59,34 +61,41 @@ const DocumentList = ({
                 </div>
               </td>
               <td>
-              <div className={styles.tags}>
+                <div className={styles.tags}>
                   {doc.tags.map(tag => (
-                  <span key={tag} className={styles.tag}>{tag}</span>
-                ))}
+                    <span key={tag} className={styles.tag}>{tag}</span>
+                  ))}
                 </div>
               </td>
               <td>{formatDistanceToNow(new Date(doc.uploadDate), { addSuffix: true })}</td>
               <td>{(doc.size / 1024 / 1024).toFixed(2)} MB</td>
               <td>
-              <div className={styles.actions}>
-              <button 
-                  onClick={() => window.open(doc._url)} // Download
-                  className={styles.actionBtn}
-                >
-                  <Download className={styles.icon} />
-                </button>
-                <button 
-                  onClick={() => onEditDocument(doc)} // Edit
-                  className={styles.actionBtn}
-                >
-                  <Edit2 className={styles.icon} />
-                </button>
-                <button 
-                  onClick={() => onArchiveDocument(doc._id)} // Archive
-                  className={styles.actionBtn}
-                >
-                  <Archive className={styles.icon} />
-                </button>
+                <div className={styles.actions}>
+                  <button 
+                    onClick={() => window.open(doc._url)}
+                    className={styles.actionBtn}
+                    title="Download"
+                  >
+                    <Download className={styles.icon} />
+                  </button>
+                  <button 
+                    onClick={() => onEditDocument(doc)}
+                    className={styles.actionBtn}
+                    title="Edit"
+                  >
+                    <Edit2 className={styles.icon} />
+                  </button>
+                  <button 
+                    onClick={() => onArchiveDocument(doc._id)}
+                    className={styles.actionBtn}
+                    title={documentStatus === 'ARCHIVED' ? 'Restore' : 'Archive'}
+                  >
+                    {documentStatus === 'ARCHIVED' ? (
+                      <Undo className={styles.icon} />
+                    ) : (
+                      <Archive className={styles.icon} />
+                    )}
+                  </button>
                 </div>
               </td>
             </tr>

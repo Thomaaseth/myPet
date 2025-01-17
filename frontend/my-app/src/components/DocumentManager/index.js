@@ -7,7 +7,8 @@ import {
   createDocument,
   deleteDocument,
   searchDocuments,
-  batchUpdateDocuments
+  batchUpdateDocuments,
+  updateDocumentStatus
 } from '@/lib/api';
 import { SUGGESTED_TAGS } from '../../../src/constants/suggestedTags';
 import DocumentGrid from './DocumentDisplay/DocumentGrid';
@@ -205,17 +206,6 @@ const sortDocuments = (docs, { field, order }) => {
   });
 };
 
-// const handleUpdateDocument = async (documentId, updates) => {
-//   await handleDocumentUpdate(documentId, updates, { showLoading: false });
-// };
-
-// const handleArchiveDocument = async (documentId) => {
-//   await handleDocumentUpdate(
-//     documentId, 
-//     { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' },
-//     { showLoading: false }
-//   );
-// };
 
 const handleBatchTagUpdate = async (updates) => {
   try {
@@ -235,14 +225,25 @@ const handleBatchTagUpdate = async (updates) => {
   }
 };
 
-const handleBatchArchive = async () => {
-  await handleDocumentUpdate(
-    selectedDocs, 
-    { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' },
-    { showLoading: false }
-  );
+const handleStatusChange = async (documentId, newStatus) => {
+  try {
+    await updateDocumentStatus(petId, documentId, newStatus);
+    await fetchDocuments();
+  } catch (error) {
+    console.error('Error updating document status:', error);
+  }
 };
 
+const handleBatchStatusChange = async (documentIds, newStatus) => {
+  try {
+    await Promise.all(documentIds.map(docId => 
+      updateDocumentStatus(petId, docId, newStatus)
+    ));
+    await fetchDocuments();
+  } catch (error) {
+    console.error('Error updating document statuses:', error);
+  }
+};
 
 
 
@@ -257,11 +258,15 @@ const handleBatchArchive = async () => {
       </div>
 
       {selectedDocs.length > 0 && (
-      <BatchOperations
-        selectedCount={selectedDocs.length}
-        onTagUpdate={() => setShowBatchTagModal(true)}
-        onArchive={handleBatchArchive}
-      />
+        <BatchOperations
+          selectedCount={selectedDocs.length}
+          onTagUpdate={() => setShowBatchTagModal(true)}
+          onArchive={() => handleBatchStatusChange(
+            selectedDocs,
+            documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED'
+          )}
+          documentStatus={documentStatus}
+        />
       )}
 
       {showBatchTagModal && (
@@ -316,19 +321,6 @@ const handleBatchArchive = async () => {
         </div>
       </div>
 
-      {selectedDocs.length > 0 && (
-        <BatchOperations
-          selectedCount={selectedDocs.length}
-          onTagUpdate={() => setShowBatchTagModal(true)}
-          onArchive={() => handleDocumentUpdate(
-            selectedDocs, 
-            { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' },
-            { showLoading: false }
-          )}
-          documentStatus={documentStatus}
-        />
-      )}
-
       {viewMode === 'grid' ? (
         <DocumentGrid
           petId={petId}
@@ -339,13 +331,13 @@ const handleBatchArchive = async () => {
           selectedDocs={selectedDocs}
           onUpdateDocument={(docId, updates) => handleDocumentUpdate(docId, updates, { showLoading: false })}
           onEditDocument={handleEditDocument}
-          onArchiveDocument={(docId) => handleDocumentUpdate(
+          onArchiveDocument={(docId) => handleStatusChange(
             docId, 
-            { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' }, 
-            { showLoading: false }
+            documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED'  // CORRECT - no { status: ... }
           )}
           onDeleteDocument={handleDeleteDocument}
           onSelectionChange={handleSelectionChange}
+          documentStatus={documentStatus}
         />
       ) : (
         <DocumentList
@@ -358,12 +350,12 @@ const handleBatchArchive = async () => {
           onSelectionChange={handleSelectionChange}
           onEditDocument={handleEditDocument}
           onUpdateDocument={(docId, updates) => handleDocumentUpdate(docId, updates, { showLoading: false })}
-          onArchiveDocument={(docId) => handleDocumentUpdate(
+          onArchiveDocument={(docId) => handleStatusChange(
             docId, 
-            { status: documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED' }, 
-            { showLoading: false }
+            documentStatus === 'ARCHIVED' ? 'ACTIVE' : 'ARCHIVED'  // CORRECT - no { status: ... }
           )}
           onDeleteDocument={handleDeleteDocument}
+          documentStatus={documentStatus}
         />
       )}
       
