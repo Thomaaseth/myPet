@@ -207,26 +207,37 @@ router.put('/pets/:petId/documents/update', isAuthenticated, async (req, res) =>
           return null;
         }
 
-        // Create a clean update object with only valid fields
-        const cleanUpdate = {};
-
-        // Handle tags specifically
+        // Create a clean update object
+        const cleanUpdate = { $set: {} };
+        
+        // Handle tags
         if (Array.isArray(updateData.tags)) {
-          // Extract just the tag strings, ignore any nested objects
           const cleanTags = updateData.tags
-            .filter(tag => typeof tag === 'string')
-            .map(tag => String(tag));
-          
+          .filter(tag => typeof tag === 'string')
+          .map(tag => String(tag));
+                  
           if (cleanTags.length > 0) {
-            if (!cleanUpdate.$set) cleanUpdate.$set = {};
-            cleanUpdate.$set.tags = cleanTags;
+          cleanUpdate.$set.tags = cleanTags;
           }
-        }
+          }
+        
+          // Handle name
+          if (updateData.name && typeof updateData.name === 'string') {
+          const cleanName = updateData.name.trim();
+          if (cleanName) {
+          cleanUpdate.$set.name = cleanName;
+          }
+          }
+        
+          console.log('Clean update object:', JSON.stringify(cleanUpdate, null, 2));
+        
         
         // Skip update if no valid fields to update
-        if (Object.keys(cleanUpdate).length === 0) {
+        if (Object.keys(cleanUpdate.$set).length === 0) {
           return null;
         }
+
+        console.log('Performing update with:', JSON.stringify(cleanUpdate, null, 2)); // Add this log
 
         // Find and update document
         const document = await Document.findOneAndUpdate(
