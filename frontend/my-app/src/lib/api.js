@@ -589,13 +589,16 @@ export const updateDocumentStatus = async (petId, documentId, status) => {
 
 export const deleteDocument = async (petId, documentId) => {
     try {
-        const response = await api.delete(
-            `/api/pets/${petId}/documents/${documentId}`
-        );
+        const response = await api.delete(`/api/pets/${petId}/documents/${documentId}`);
         return response.data;
     } catch (error) {
         console.error('Error deleting document:', error.response || error);
-        throw error.response ? error.response.data : error;
+        
+        if (error.response?.data?.message) {
+            throw new Error(error.response.data.message);
+        }
+        
+        throw new Error('An error occurred while deleting the document');
     }
 };
 

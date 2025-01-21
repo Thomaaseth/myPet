@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileIcon, CheckCircle, Download, Edit2, Archive, Undo } from 'lucide-react';
+import { FileIcon, CheckCircle, Download, Edit2, Archive, Undo, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import styles from './DocumentList.module.css';
 
@@ -90,12 +90,21 @@ const DocumentList = ({
                     className={styles.actionBtn}
                     title={documentStatus === 'ARCHIVED' ? 'Restore' : 'Archive'}
                   >
-                    {documentStatus === 'ARCHIVED' ? (
+                     {documentStatus === 'ARCHIVED' ? (
                       <Undo className={styles.icon} />
                     ) : (
                       <Archive className={styles.icon} />
                     )}
                   </button>
+                  {documentStatus === 'ARCHIVED' && (
+                    <button 
+                      onClick={() => onDeleteDocument(doc._id)}
+                      className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                      title="Delete"
+                    >
+                      <Trash2 className={styles.icon} />
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

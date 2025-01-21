@@ -164,13 +164,43 @@ const handleDocumentUpdate = async (documentIds, updates, options = {}) => {
 };
 
 const handleDeleteDocument = async (documentId) => {
-  if (window.confirm('Are you sure you want to delete this document?')) {
-    try {
-      await deleteDocument(petId, documentId);
-      fetchDocuments();
-    } catch (error) {
-      console.error('Error deleting document:', error);
+  try {
+    const documentToDelete = documents.find(doc => doc._id === documentId);
+    
+    if (!documentToDelete) {
+      console.error('Document not found');
+      return;
     }
+
+    if (documentStatus !== 'ARCHIVED') {
+      alert('Only archived documents can be deleted. Please archive the document first.');
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to permanently delete "${documentToDelete.name}"? This action cannot be undone.`
+    );
+    
+    if (!confirmDelete) {
+      return;
+    }
+
+    setIsUploading(true);
+
+    await deleteDocument(petId, documentId);
+    
+    setDocuments(prev => prev.filter(doc => doc._id !== documentId));
+    
+    if (selectedDocs.includes(documentId)) {
+      setSelectedDocs(prev => prev.filter(id => id !== documentId));
+      setSelectedDocuments(prev => prev.filter(doc => doc._id !== documentId));
+    }
+
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    alert('Failed to delete document. Please try again.');
+  } finally {
+    setIsUploading(false);
   }
 };
 
