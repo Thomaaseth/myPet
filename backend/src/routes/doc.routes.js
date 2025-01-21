@@ -336,7 +336,14 @@ router.delete('/pets/:petId/documents/:documentId', isAuthenticated, async (req,
       return res.status(404).json({ message: 'Document not found' });
     }
 
-    // Delete from S3
+    // Check if document is archived
+    if (document.status !== 'ARCHIVED') {
+      return res.status(400).json({ 
+        message: 'Document must be archived before it can be deleted' 
+      });
+    }
+
+    // Delete from S3 AWS
     await s3Service.deleteFile(document.s3Key);
 
     // Delete document record
